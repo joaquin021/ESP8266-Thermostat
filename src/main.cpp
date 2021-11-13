@@ -1,9 +1,20 @@
 #include <Arduino.h>
 
+#include "ThermostatData.hpp"
+ThermostatData thermostatData;
+
+#include "TftUtils.hpp"
+#include "ThermostatManager.hpp"
+
 void setup() {
-  // put your setup code here, to run once:
+    Serial.begin(115200);
+    Serial.println();
+    pinMode(RELAY_PIN, OUTPUT);
+    digitalWrite(RELAY_PIN, LOW);
+    initTft();
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+    detectToutch();
+    thermostat();
 }
