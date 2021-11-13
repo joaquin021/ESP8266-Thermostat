@@ -3,12 +3,11 @@
 
 #include <Adafruit_GFX.h>
 #include <Adafruit_ILI9341.h>
-#include <XPT2046_Touchscreen.h>
-
 #include <Fonts/FreeSans9pt7b.h>
-#include <Fonts/FreeSansBold9pt7b.h>
 #include <Fonts/FreeSansBold12pt7b.h>
 #include <Fonts/FreeSansBold24pt7b.h>
+#include <Fonts/FreeSansBold9pt7b.h>
+#include <XPT2046_Touchscreen.h>
 
 #include "ShtUtils.hpp"
 #include "usergraphics.h"
@@ -30,6 +29,9 @@
 #define TS_MAXX 3700
 #define TS_MAXY 3600
 /*______End of Calibration______*/
+
+#define MAX_TEMPERATURE 35
+#define MIN_TEMPERATURE 8
 
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 XPT2046_Touchscreen touch(TS_CS);
@@ -147,11 +149,15 @@ void detectButtons(int x, int y) {
     //up down temperature buttons
     if (x >= 200) {
         if (y <= 40) {
-            thermostatData.increaseTargetTemp();
-            updateTargetTemp();
+            if (thermostatData.getTargetTemp() < MAX_TEMPERATURE) {
+                thermostatData.increaseTargetTemp();
+                updateTargetTemp();
+            }
         } else if (y >= 200 && y <= 240) {
-            thermostatData.decreaseTargetTemp();
-            updateTargetTemp();
+            if (thermostatData.getTargetTemp() > MIN_TEMPERATURE) {
+                thermostatData.decreaseTargetTemp();
+                updateTargetTemp();
+            }
         }
     }
     // power button
