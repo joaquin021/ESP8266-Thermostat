@@ -1,3 +1,18 @@
+#ifndef __TFT_UTILS_H
+#define __TFT_UTILS_H
+
+#include <Adafruit_GFX.h>
+#include <Adafruit_ILI9341.h>
+#include <XPT2046_Touchscreen.h>
+
+#include <Fonts/FreeSans9pt7b.h>
+#include <Fonts/FreeSansBold9pt7b.h>
+#include <Fonts/FreeSansBold12pt7b.h>
+#include <Fonts/FreeSansBold24pt7b.h>
+
+#include "ShtUtils.hpp"
+#include "usergraphics.h"
+
 #define TFT_CS D0
 #define TFT_DC D8
 #define TFT_RST -1
@@ -165,3 +180,5 @@ void detectToutch() {
         touchPressed = false;
     }
 }
+
+#endif

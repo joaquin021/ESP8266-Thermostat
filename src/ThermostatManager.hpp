@@ -1,3 +1,9 @@
+#ifndef __THERMOSTAT_MANAGER_H
+#define __THERMOSTAT_MANAGER_H
+
+#include "ShtUtils.hpp"
+#include "TftUtils.hpp"
+
 #define MAX_TEMPERATURE 28
 #define MIN_TEMPERATURE 18
 #define RELAY_PIN D4
@@ -40,3 +46,5 @@ void thermostat() {
     updateRoomTemp(temperature);
     //publishActionAndMode();
 }
+
+#endif

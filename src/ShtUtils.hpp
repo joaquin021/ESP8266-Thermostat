@@ -1,3 +1,8 @@
+#ifndef __SHT_UTILS_H
+#define __SHT_UTILS_H
+
+#include <WEMOS_SHT3X.h>
+
 SHT3X sht30(0x45);
 
 unsigned long NEXT_LOAD_SENSOR_TIME = millis();
@@ -19,3 +24,5 @@ float getHumidity() {
     refreshData();
     return sht30.humidity;
 }
+
+#endif
