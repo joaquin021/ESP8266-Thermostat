@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "string": "cpp",
+        "vector": "cpp",
+        "limits": "cpp",
+        "utility": "cpp",
+        "system_error": "cpp",
+        "bit": "cpp",
+        "*.tcc": "cpp",
+        "numeric": "cpp",
+        "memory": "cpp"
+    }
+}
