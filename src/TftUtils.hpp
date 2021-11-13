@@ -172,10 +172,12 @@ void detectButtons(int x, int y)
       if (strcmp(thermostatData.mode, "heat") == 0)
       {
         changeThermostatMode("off", 4);
+        tft.drawBitmap(100, 275, power, 40, 40, ILI9341_RED);
       }
       else
       {
         changeThermostatMode("heat", 5);
+        tft.drawBitmap(100, 275, power, 40, 40, ILI9341_ULTRA_DARKGREY);
       }
     }
   }
