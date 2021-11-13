@@ -2,46 +2,36 @@
 #define MIN_TEMPERATURE 18
 #define RELAY_PIN D4
 
-boolean temperatureAboveTarget(float temperature)
-{
-    return temperature >= thermostatData.targetTemp + thermostatData.hotTolerance;
+boolean temperatureAboveTarget(float temperature) {
+    return temperature > thermostatData.getTargetTemp() + thermostatData.getHotTolerance();
 }
 
-boolean temperatureBelowTarget(float temperature)
-{
-    return temperature <= thermostatData.targetTemp - thermostatData.coldTolerance;
+boolean temperatureBelowTarget(float temperature) {
+    return temperature < thermostatData.getTargetTemp() - thermostatData.getColdTolerance();
 }
 
-boolean temperatureBetweenToleranceRange(float temperature)
-{
-    return temperature < thermostatData.targetTemp + thermostatData.hotTolerance && temperature > thermostatData.targetTemp - thermostatData.coldTolerance;
-}
-
-void thermostat()
-{
+void thermostat() {
     float temperature = getTemperature();
     //float humidity = getHumidity();
-    if (strcmp(thermostatData.mode, "heat") == 0)
-    {
-        if (!thermostatData.action.equals("idle") && (temperatureAboveTarget(temperature) || temperatureBetweenToleranceRange(temperature)))
-        {
+    if (strcmp(thermostatData.getMode(), "heat") == 0) {
+        if (thermostatData.getAction().compare("idle") != 0 && temperatureAboveTarget(temperature)) {
             digitalWrite(RELAY_PIN, LOW);
-            thermostatData.action = "idle";
+            thermostatData.setAction("idle");
             updateCircleColor(temperature);
             //publishActionAndMode();
-        }
-        else if (!thermostatData.action.equals("heating") && temperatureBelowTarget(temperature))
-        {
+        } else if (thermostatData.getAction().compare("heating") != 0 && temperatureBelowTarget(temperature)) {
             digitalWrite(RELAY_PIN, HIGH);
-            thermostatData.action = "heating";
+            thermostatData.setAction("heating");
             updateCircleColor(temperature);
             //publishActionAndMode();
+        } else if (thermostatData.getAction().compare("off") == 0) {
+            digitalWrite(RELAY_PIN, LOW);
+            thermostatData.setAction("idle");
+            updateCircleColor(temperature);
         }
-    }
-    else if (!thermostatData.action.equals("off"))
-    {
+    } else if (thermostatData.getAction().compare("off") != 0) {
         digitalWrite(RELAY_PIN, LOW);
-        thermostatData.action = "off";
+        thermostatData.setAction("off");
         updateCircleColor(temperature);
         //publishActionAndMode();
     }
