@@ -7,7 +7,7 @@
 String ssid = "";
 String password = "";
 
-String WIFI_STATUS[] = {"WL_IDLE_STATUS", "WL_NO_SSID_AVAIL", "", "WL_CONNECTED", "WL_CONNECT_FAILED", "", "WL_DISCONNECTED"};
+String WIFI_STATUS[] = {"WL_IDLE_STATUS", "WL_NO_SSID_AVAIL", "WL_SCAN_COMPLETED", "WL_CONNECTED", "WL_CONNECT_FAILED", "WL_CONNECTION_LOST", "WL_WRONG_PASSWORD", "WL_DISCONNECTED"};
 
 void checkConnectionWiFi_STA() {
     if (WiFi.waitForConnectResult() == WL_CONNECTED) {
