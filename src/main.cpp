@@ -5,6 +5,7 @@ ThermostatData thermostatData;
 
 #include "TftUtils.hpp"
 #include "ThermostatManager.hpp"
+#include "WiFiUtils.hpp"
 
 void setup() {
     Serial.begin(115200);
@@ -12,6 +13,7 @@ void setup() {
     pinMode(RELAY_PIN, OUTPUT);
     digitalWrite(RELAY_PIN, LOW);
     initTft();
+    connectWiFi();
 }
 
 void loop() {
