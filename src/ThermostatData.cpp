@@ -5,6 +5,14 @@
 #include <cstring>
 using namespace std;
 
+float ThermostatData::getTemperature() { return temperature; }
+
+void ThermostatData::setTemperature(float newTemperature) { temperature = newTemperature; }
+
+float ThermostatData::getHumidity() { return humidity; }
+
+void ThermostatData::setHumidity(float newHumidity) { humidity = newHumidity; }
+
 float ThermostatData::getHotTolerance() { return hotTolerance; }
 
 float ThermostatData::getColdTolerance() { return coldTolerance; }
@@ -35,9 +43,7 @@ void ThermostatData::changeMode(uint8_t *newMode, unsigned int length) {
     mode[length] = '\0';
 }
 
-bool ThermostatData::isConectivityActive() {
-    return conectivityActive;
-}
+bool ThermostatData::isConectivityActive() { return conectivityActive; }
 bool ThermostatData::toggleConnectivity() {
     conectivityActive = !conectivityActive;
     return conectivityActive;

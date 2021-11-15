@@ -12,8 +12,7 @@
 
 #include <string>
 
-#include "MqttUtils.hpp"
-#include "ShtUtils.hpp"
+#include "EventUtils.hpp"
 #include "usergraphics.h"
 
 #define TFT_CS D0
@@ -45,11 +44,6 @@ bool touchPressed = false;
 
 int WIFI_STATUS_COLOR[] = {ILI9341_ULTRA_DARKGREY, ILI9341_ORANGE, ILI9341_DARKCYAN, ILI9341_WHITE, ILI9341_RED, ILI9341_PURPLE, ILI9341_RED, ILI9341_ULTRA_DARKGREY};
 
-float lastRoomTemperaturePrinted = 0;
-float lastTargetTempPrinted = 0;
-int lastWifiStatus = -1;
-std::string lastPowerButton = "";
-
 void drawUpDownButton() {
     //up button
     tft.fillTriangle(215, 10, 230, 30, 200, 30, ILI9341_WHITE);
@@ -58,57 +52,49 @@ void drawUpDownButton() {
 }
 
 void drawPowerButton() {
-    if (lastPowerButton.compare(thermostatData.getMode()) != 0) {
-        if (strcmp(thermostatData.getMode(), "heat") == 0) {
-            tft.drawBitmap(100, 275, powerIcon, 40, 40, ILI9341_WHITE);
-        } else {
-            tft.drawBitmap(100, 275, powerIcon, 40, 40, ILI9341_RED);
-        }
-        lastPowerButton = thermostatData.getMode();
+    Serial.println("TftUtils.hpp\t\t\tDraw power button");
+    if (strcmp(thermostatData.getMode(), "heat") == 0) {
+        tft.drawBitmap(100, 275, powerIcon, 40, 40, ILI9341_WHITE);
+    } else {
+        tft.drawBitmap(100, 275, powerIcon, 40, 40, ILI9341_RED);
     }
 }
 
-void drawWifiButton() {
-    int wifiStatus = WiFi.status();
-    if (lastWifiStatus != wifiStatus) {
-        tft.drawBitmap(10, 10, wifiIcon, 24, 24, WIFI_STATUS_COLOR[wifiStatus]);
-        lastWifiStatus = wifiStatus;
-    }
+void drawWiFiButton() {
+    Serial.println("TftUtils.hpp\t\t\tDraw WiFi button.");
+    tft.drawBitmap(10, 10, wifiIcon, 24, 24, WIFI_STATUS_COLOR[WiFi.status()]);
 }
 
 void updateTargetTemp() {
-    if (lastTargetTempPrinted != thermostatData.getTargetTemp()) {
-        int16_t x1, y1;
-        uint16_t w, h;
-        char targetTempAux[5];
-        dtostrf(thermostatData.getTargetTemp(), 4, 1, targetTempAux);
-        tft.fillRect(50, 96, 93, 50, ILI9341_BLACK);
-        tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
-        tft.setFont(&FreeSansBold24pt7b);
-        tft.getTextBounds(targetTempAux, 53, 130, &x1, &y1, &w, &h);
-        tft.setCursor(137 - w, 130);
-        tft.print(targetTempAux);
-        lastTargetTempPrinted = thermostatData.getTargetTemp();
-    }
+    Serial.println("TftUtils.hpp\t\t\tDraw target temperature.");
+    int16_t x1, y1;
+    uint16_t w, h;
+    char targetTempAux[5];
+    dtostrf(thermostatData.getTargetTemp(), 4, 1, targetTempAux);
+    tft.fillRect(50, 96, 93, 50, ILI9341_BLACK);
+    tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+    tft.setFont(&FreeSansBold24pt7b);
+    tft.getTextBounds(targetTempAux, 53, 130, &x1, &y1, &w, &h);
+    tft.setCursor(137 - w, 130);
+    tft.print(targetTempAux);
 }
 
-void updateRoomTemp(float temperature) {
-    if (lastRoomTemperaturePrinted != temperature) {
-        int16_t x1, y1;
-        uint16_t w, h;
-        char currentValue[5];
-        dtostrf(temperature, 4, 1, currentValue);
-        tft.fillRect(20, 200, 50, 21, ILI9341_ULTRA_DARKGREY);
-        tft.setTextColor(ILI9341_WHITE, ILI9341_ULTRA_DARKGREY);
-        tft.setFont(&FreeSansBold12pt7b);
-        tft.getTextBounds(currentValue, 40, 219, &x1, &y1, &w, &h);
-        tft.setCursor(66 - w, 219);
-        tft.print(currentValue);
-        lastRoomTemperaturePrinted = temperature;
-    }
+void updateRoomTemp() {
+    Serial.println("TftUtils.hpp\t\t\tDraw room temperature.");
+    int16_t x1, y1;
+    uint16_t w, h;
+    char currentValue[5];
+    dtostrf(thermostatData.getTemperature(), 4, 1, currentValue);
+    tft.fillRect(20, 200, 50, 21, ILI9341_ULTRA_DARKGREY);
+    tft.setTextColor(ILI9341_WHITE, ILI9341_ULTRA_DARKGREY);
+    tft.setFont(&FreeSansBold12pt7b);
+    tft.getTextBounds(currentValue, 40, 219, &x1, &y1, &w, &h);
+    tft.setCursor(66 - w, 219);
+    tft.print(currentValue);
 }
 
-void updateCircleColor(float temperature) {
+void updateCircleColor() {
+    Serial.println("TftUtils.hpp\t\t\tDraw circles color.");
     //draw big circle
     unsigned char i;
     if (thermostatData.getAction().compare("heating") == 0) {
@@ -124,8 +110,7 @@ void updateCircleColor(float temperature) {
 
     //draw small
     tft.fillCircle(60, 200, 45, ILI9341_ULTRA_DARKGREY);
-    lastRoomTemperaturePrinted = 0;
-    updateRoomTemp(temperature);
+    updateRoomTemp();
     //draw °C in big circle
     tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
     tft.setFont(&FreeSansBold9pt7b);
@@ -150,19 +135,11 @@ void updateCircleColor(float temperature) {
 
 void drawMainScreen() {
     tft.fillScreen(ILI9341_BLACK);
-    updateCircleColor(getTemperature());
+    updateCircleColor();
     drawUpDownButton();
     drawPowerButton();
-    drawWifiButton();
+    drawWiFiButton();
     updateTargetTemp();
-    NEXT_LOAD_SENSOR_TIME = millis();
-}
-
-void refreshScreen(float temperature) {
-    updateRoomTemp(temperature);
-    updateTargetTemp();
-    drawPowerButton();
-    drawWifiButton();
 }
 
 void initTft() {
@@ -191,14 +168,12 @@ void detectButtons(int x, int y) {
         if (y <= 40) {
             if (thermostatData.getTargetTemp() < MAX_TEMPERATURE) {
                 thermostatData.increaseTargetTemp();
-                updateTargetTemp();
-                publishTargetTemperature();
+                addEvent(EVENT_TYPES::TARGET_TEMPERATURE);
             }
         } else if (y >= 200 && y <= 240) {
             if (thermostatData.getTargetTemp() > MIN_TEMPERATURE) {
                 thermostatData.decreaseTargetTemp();
-                updateTargetTemp();
-                publishTargetTemperature();
+                addEvent(EVENT_TYPES::TARGET_TEMPERATURE);
             }
         }
     }
@@ -209,12 +184,13 @@ void detectButtons(int x, int y) {
         } else {
             thermostatData.changeMode("heat", 5);
         }
-        drawPowerButton();
+        addEvent(EVENT_TYPES::MODE);
     }
     // wifi button
     else if (x <= 40 && y <= 40) {
+        tft.drawBitmap(10, 10, wifiIcon, 24, 24, ILI9341_YELLOW);
         thermostatData.toggleConnectivity();
-        drawWifiButton();
+        addEvent(EVENT_TYPES::CONNECTIVITY);
     }
 }
 

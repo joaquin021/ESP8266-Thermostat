@@ -4,22 +4,22 @@
 #include <ESP8266WiFi.h>
 #include <LittleFS.h>
 
-#include "TftUtils.hpp"
+#include "EventUtils.hpp"
 
 String ssid = "";
 String password = "";
 
 String WIFI_STATUS[] = {"WL_IDLE_STATUS", "WL_NO_SSID_AVAIL", "WL_SCAN_COMPLETED", "WL_CONNECTED", "WL_CONNECT_FAILED", "WL_CONNECTION_LOST", "WL_WRONG_PASSWORD", "WL_DISCONNECTED"};
 
+int lastWiFiStatus = -1;
+
 void checkConnectionWiFi_STA() {
-    drawWifiButton();
     if (WiFi.waitForConnectResult() == WL_CONNECTED) {
-        Serial.print("STA running:\t");
-        Serial.println(ssid);
-        Serial.print("IP address:\t");
+        Serial.println("WiFiUtils.hpp\t\t\tSTA running:\t" + ssid);
+        Serial.print("WiFiUtils.hpp\t\t\tIP address:\t");
         Serial.println(WiFi.localIP());
     } else {
-        Serial.println("Connection with " + ssid + " failed");
+        Serial.println("WiFiUtils.hpp\t\t\tConnection with " + ssid + " failed");
         ssid = "";
         password = "";
     }
@@ -28,16 +28,14 @@ void checkConnectionWiFi_STA() {
 void connectWiFi_STA_fromFlash() {
     ssid = WiFi.SSID();
     Serial.println("");
-    Serial.println("Connecting from flash to " + ssid);
+    Serial.println("WiFiUtils.hpp\t\t\tConnecting from flash to " + ssid);
     WiFi.begin();
     checkConnectionWiFi_STA();
 }
 
 void connectWiFi_STA_fromConfig() {
-    ssid = "INVALID";
-    password = "AXWG*3f9d1c";
     Serial.println("");
-    Serial.println("Connecting from config to " + ssid);
+    Serial.println("WiFiUtils.hpp\t\t\tConnecting from config to " + ssid);
     WiFi.begin(ssid, password);
     checkConnectionWiFi_STA();
 }
@@ -100,10 +98,21 @@ void connectWiFi() {
             connectWiFi_STA_fromConfig();
         }
     }
+    addEvent(EVENT_TYPES::CONNECTIVITY);
+    lastWiFiStatus = WiFi.status();
 }
 
 void disconnectWiFi() {
+    Serial.println("WiFiUtils.hpp\t\t\tDisconnect WiFi.");
     WiFi.disconnect();
+    lastWiFiStatus = WiFi.status();
+}
+
+void checkIfWiFiStatusHasChanged() {
+    if (WiFi.status() != lastWiFiStatus) {
+        addEvent(EVENT_TYPES::CONNECTIVITY);
+        lastWiFiStatus = WiFi.status();
+    }
 }
 
 #endif

@@ -5,6 +5,8 @@
 
 class ThermostatData {
    private:
+    float temperature = 0;
+    float humidity = 0;
     float hotTolerance = 0.5;
     float coldTolerance = 0.5;
     float temperatureStep = 0.5;
@@ -14,6 +16,10 @@ class ThermostatData {
     bool conectivityActive = true;
 
    public:
+    float getTemperature();
+    void setTemperature(float newTemperature);
+    float getHumidity();
+    void setHumidity(float newHumidity);
     float getHotTolerance();
     float getColdTolerance();
     float getTargetTemp();
