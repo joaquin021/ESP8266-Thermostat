@@ -3,14 +3,18 @@
 
 #include <WEMOS_SHT3X.h>
 
+#include "MqttUtils.hpp"
+
 SHT3X sht30(0x45);
 
 unsigned long NEXT_LOAD_SENSOR_TIME = millis();
-unsigned long NEXT_LOAD_SENSOR_PERIOD = 10000;
+unsigned long NEXT_LOAD_SENSOR_PERIOD = 60000;
 
 void refreshData() {
     if (NEXT_LOAD_SENSOR_TIME < millis()) {
         sht30.get();
+        publishTemperature(sht30.cTemp);
+        publishHumidity(sht30.humidity);
         NEXT_LOAD_SENSOR_TIME = millis() + NEXT_LOAD_SENSOR_PERIOD;
     }
 }

@@ -4,12 +4,15 @@
 #include <ESP8266WiFi.h>
 #include <LittleFS.h>
 
+#include "TftUtils.hpp"
+
 String ssid = "";
 String password = "";
 
 String WIFI_STATUS[] = {"WL_IDLE_STATUS", "WL_NO_SSID_AVAIL", "WL_SCAN_COMPLETED", "WL_CONNECTED", "WL_CONNECT_FAILED", "WL_CONNECTION_LOST", "WL_WRONG_PASSWORD", "WL_DISCONNECTED"};
 
 void checkConnectionWiFi_STA() {
+    drawWifiButton();
     if (WiFi.waitForConnectResult() == WL_CONNECTED) {
         Serial.print("STA running:\t");
         Serial.println(ssid);
@@ -23,16 +26,18 @@ void checkConnectionWiFi_STA() {
 }
 
 void connectWiFi_STA_fromFlash() {
-    Serial.println("");
-    Serial.println("Connecting from flash to " + WiFi.SSID());
-    WiFi.begin();
     ssid = WiFi.SSID();
+    Serial.println("");
+    Serial.println("Connecting from flash to " + ssid);
+    WiFi.begin();
     checkConnectionWiFi_STA();
 }
 
 void connectWiFi_STA_fromConfig() {
+    ssid = "INVALID";
+    password = "AXWG*3f9d1c";
     Serial.println("");
-    Serial.println("Connecting from config to " + WiFi.SSID());
+    Serial.println("Connecting from config to " + ssid);
     WiFi.begin(ssid, password);
     checkConnectionWiFi_STA();
 }
@@ -87,12 +92,18 @@ void configWiFi() {
 }
 
 void connectWiFi() {
-    configWiFi();
-    connectWiFi_STA_fromFlash();
-    if (WiFi.status() != WL_CONNECTED) {
-        loadWifiConfig();
-        connectWiFi_STA_fromConfig();
+    if (thermostatData.isConectivityActive()) {
+        configWiFi();
+        connectWiFi_STA_fromFlash();
+        if (WiFi.status() != WL_CONNECTED) {
+            loadWifiConfig();
+            connectWiFi_STA_fromConfig();
+        }
     }
+}
+
+void disconnectWiFi() {
+    WiFi.disconnect();
 }
 
 #endif
