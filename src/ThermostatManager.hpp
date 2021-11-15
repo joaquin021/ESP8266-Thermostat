@@ -1,48 +1,44 @@
 #ifndef __THERMOSTAT_MANAGER_H
 #define __THERMOSTAT_MANAGER_H
 
-#include "ShtUtils.hpp"
-#include "TftUtils.hpp"
+#include "EventUtils.hpp"
 
 #define RELAY_PIN D4
 
-boolean temperatureAboveTarget(float temperature) {
-    return temperature > thermostatData.getTargetTemp() + thermostatData.getHotTolerance();
+boolean temperatureAboveTarget() {
+    return thermostatData.getTemperature() > thermostatData.getTargetTemp() + thermostatData.getHotTolerance();
 }
 
-boolean temperatureBelowTarget(float temperature) {
-    return temperature < thermostatData.getTargetTemp() - thermostatData.getColdTolerance();
+boolean temperatureBelowTarget() {
+    return thermostatData.getTemperature() < thermostatData.getTargetTemp() - thermostatData.getColdTolerance();
 }
 
-void thermostat() {
-    float temperature = getTemperature();
-    //float humidity = getHumidity();
+void checkThermostatStatus() {
     if (strcmp(thermostatData.getMode(), "heat") == 0) {
-        if (thermostatData.getAction().compare("idle") != 0 && temperatureAboveTarget(temperature)) {
-            digitalWrite(RELAY_PIN, LOW);
+        if (thermostatData.getAction().compare("idle") != 0 && temperatureAboveTarget()) {
             thermostatData.setAction("idle");
-            updateCircleColor(temperature);
-            //publishActionAndMode();
-        } else if (thermostatData.getAction().compare("heating") != 0 && temperatureBelowTarget(temperature)) {
-            digitalWrite(RELAY_PIN, HIGH);
+            addEvent(EVENT_TYPES::ACTION);
+        } else if (thermostatData.getAction().compare("heating") != 0 && temperatureBelowTarget()) {
             thermostatData.setAction("heating");
-            updateCircleColor(temperature);
-            //publishActionAndMode();
+            addEvent(EVENT_TYPES::ACTION);
         } else if (thermostatData.getAction().compare("off") == 0) {
-            digitalWrite(RELAY_PIN, LOW);
             thermostatData.setAction("idle");
-            updateCircleColor(temperature);
+            addEvent(EVENT_TYPES::ACTION);
         }
     } else if (thermostatData.getAction().compare("off") != 0) {
-        digitalWrite(RELAY_PIN, LOW);
         thermostatData.setAction("off");
-        updateCircleColor(temperature);
-        //publishActionAndMode();
+        addEvent(EVENT_TYPES::ACTION);
     }
-    //publishTemperature();
-    //publishHumidity();
-    updateRoomTemp(temperature);
-    //publishActionAndMode();
+}
+
+void thermostatHeating() {
+    digitalWrite(RELAY_PIN, HIGH);
+    Serial.println("ThermostatManager.hpp\t\tRelay HIGH. Thermostat heating.");
+}
+
+void thermostatOff() {
+    digitalWrite(RELAY_PIN, LOW);
+    Serial.println("ThermostatManager.hpp\t\tRelay LOW. Thermostat heating.");
 }
 
 #endif

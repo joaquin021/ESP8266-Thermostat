@@ -3,13 +3,16 @@
 
 #include <Adafruit_GFX.h>
 #include <Adafruit_ILI9341.h>
+#include <ESP8266WiFi.h>
 #include <Fonts/FreeSans9pt7b.h>
 #include <Fonts/FreeSansBold12pt7b.h>
 #include <Fonts/FreeSansBold24pt7b.h>
 #include <Fonts/FreeSansBold9pt7b.h>
 #include <XPT2046_Touchscreen.h>
 
-#include "ShtUtils.hpp"
+#include <string>
+
+#include "EventUtils.hpp"
 #include "usergraphics.h"
 
 #define TFT_CS D0
@@ -17,8 +20,8 @@
 #define TFT_RST -1
 #define TS_CS D3
 
-/*______Assign pressure_______*/
 #define ILI9341_ULTRA_DARKGREY 0x632C
+/*______Assign pressure_______*/
 #define MINPRESSURE 10
 #define MAXPRESSURE 2000
 /*_______Assigned______*/
@@ -39,9 +42,31 @@ XPT2046_Touchscreen touch(TS_CS);
 TS_Point tsPoint;
 bool touchPressed = false;
 
-float lastRoomTemperature = 0;
+int WIFI_STATUS_COLOR[] = {ILI9341_ULTRA_DARKGREY, ILI9341_ORANGE, ILI9341_DARKCYAN, ILI9341_WHITE, ILI9341_RED, ILI9341_PURPLE, ILI9341_RED, ILI9341_ULTRA_DARKGREY};
+
+void drawUpDownButton() {
+    //up button
+    tft.fillTriangle(215, 10, 230, 30, 200, 30, ILI9341_WHITE);
+    //down button
+    tft.fillTriangle(215, 230, 230, 210, 200, 210, ILI9341_WHITE);
+}
+
+void drawPowerButton() {
+    Serial.println("TftUtils.hpp\t\t\tDraw power button");
+    if (strcmp(thermostatData.getMode(), "heat") == 0) {
+        tft.drawBitmap(100, 275, powerIcon, 40, 40, ILI9341_WHITE);
+    } else {
+        tft.drawBitmap(100, 275, powerIcon, 40, 40, ILI9341_RED);
+    }
+}
+
+void drawWiFiButton() {
+    Serial.println("TftUtils.hpp\t\t\tDraw WiFi button.");
+    tft.drawBitmap(10, 10, wifiIcon, 24, 24, WIFI_STATUS_COLOR[WiFi.status()]);
+}
 
 void updateTargetTemp() {
+    Serial.println("TftUtils.hpp\t\t\tDraw target temperature.");
     int16_t x1, y1;
     uint16_t w, h;
     char targetTempAux[5];
@@ -54,30 +79,22 @@ void updateTargetTemp() {
     tft.print(targetTempAux);
 }
 
-void drawUpDownButton() {
-    //up button
-    tft.fillTriangle(215, 10, 230, 30, 200, 30, ILI9341_WHITE);
-    //down button
-    tft.fillTriangle(215, 230, 230, 210, 200, 210, ILI9341_WHITE);
+void updateRoomTemp() {
+    Serial.println("TftUtils.hpp\t\t\tDraw room temperature.");
+    int16_t x1, y1;
+    uint16_t w, h;
+    char currentValue[5];
+    dtostrf(thermostatData.getTemperature(), 4, 1, currentValue);
+    tft.fillRect(20, 200, 50, 21, ILI9341_ULTRA_DARKGREY);
+    tft.setTextColor(ILI9341_WHITE, ILI9341_ULTRA_DARKGREY);
+    tft.setFont(&FreeSansBold12pt7b);
+    tft.getTextBounds(currentValue, 40, 219, &x1, &y1, &w, &h);
+    tft.setCursor(66 - w, 219);
+    tft.print(currentValue);
 }
 
-void updateRoomTemp(float temperature) {
-    if (lastRoomTemperature != temperature) {
-        int16_t x1, y1;
-        uint16_t w, h;
-        char currentValue[5];
-        dtostrf(temperature, 4, 1, currentValue);
-        tft.fillRect(20, 200, 50, 21, ILI9341_ULTRA_DARKGREY);
-        tft.setTextColor(ILI9341_WHITE, ILI9341_ULTRA_DARKGREY);
-        tft.setFont(&FreeSansBold12pt7b);
-        tft.getTextBounds(currentValue, 40, 219, &x1, &y1, &w, &h);
-        tft.setCursor(66 - w, 219);
-        tft.print(currentValue);
-        lastRoomTemperature = temperature;
-    }
-}
-
-void updateCircleColor(float temperature) {
+void updateCircleColor() {
+    Serial.println("TftUtils.hpp\t\t\tDraw circles color.");
     //draw big circle
     unsigned char i;
     if (thermostatData.getAction().compare("heating") == 0) {
@@ -93,8 +110,7 @@ void updateCircleColor(float temperature) {
 
     //draw small
     tft.fillCircle(60, 200, 45, ILI9341_ULTRA_DARKGREY);
-    lastRoomTemperature = 0;
-    updateRoomTemp(temperature);
+    updateRoomTemp();
     //draw °C in big circle
     tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
     tft.setFont(&FreeSansBold9pt7b);
@@ -119,9 +135,10 @@ void updateCircleColor(float temperature) {
 
 void drawMainScreen() {
     tft.fillScreen(ILI9341_BLACK);
-    updateCircleColor(getTemperature());
+    updateCircleColor();
     drawUpDownButton();
-    tft.drawBitmap(100, 275, power, 40, 40, ILI9341_RED);
+    drawPowerButton();
+    drawWiFiButton();
     updateTargetTemp();
 }
 
@@ -151,26 +168,29 @@ void detectButtons(int x, int y) {
         if (y <= 40) {
             if (thermostatData.getTargetTemp() < MAX_TEMPERATURE) {
                 thermostatData.increaseTargetTemp();
-                updateTargetTemp();
+                addEvent(EVENT_TYPES::TARGET_TEMPERATURE);
             }
         } else if (y >= 200 && y <= 240) {
             if (thermostatData.getTargetTemp() > MIN_TEMPERATURE) {
                 thermostatData.decreaseTargetTemp();
-                updateTargetTemp();
+                addEvent(EVENT_TYPES::TARGET_TEMPERATURE);
             }
         }
     }
     // power button
-    else if (x >= 95 && x <= 145) {
-        if (y >= 270) {
-            if (strcmp(thermostatData.getMode(), "heat") == 0) {
-                thermostatData.changeMode("off", 4);
-                tft.drawBitmap(100, 275, power, 40, 40, ILI9341_RED);
-            } else {
-                thermostatData.changeMode("heat", 5);
-                tft.drawBitmap(100, 275, power, 40, 40, ILI9341_ULTRA_DARKGREY);
-            }
+    else if (x >= 95 && x <= 145 && y >= 270) {
+        if (strcmp(thermostatData.getMode(), "heat") == 0) {
+            thermostatData.changeMode("off", 4);
+        } else {
+            thermostatData.changeMode("heat", 5);
         }
+        addEvent(EVENT_TYPES::MODE);
+    }
+    // wifi button
+    else if (x <= 40 && y <= 40) {
+        tft.drawBitmap(10, 10, wifiIcon, 24, 24, ILI9341_YELLOW);
+        thermostatData.toggleConnectivity();
+        addEvent(EVENT_TYPES::CONNECTIVITY);
     }
 }
 
