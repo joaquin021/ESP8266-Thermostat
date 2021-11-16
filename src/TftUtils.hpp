@@ -34,15 +34,13 @@
 /*______End of Calibration______*/
 
 #define MAX_TEMPERATURE 35
-#define MIN_TEMPERATURE 8
+#define MIN_TEMPERATURE 7
 
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 XPT2046_Touchscreen touch(TS_CS);
 
 TS_Point tsPoint;
 bool touchPressed = false;
-
-int WIFI_STATUS_COLOR[] = {ILI9341_ULTRA_DARKGREY, ILI9341_ORANGE, ILI9341_DARKCYAN, ILI9341_WHITE, ILI9341_RED, ILI9341_PURPLE, ILI9341_RED, ILI9341_ULTRA_DARKGREY};
 
 void drawUpDownButton() {
     //up button
@@ -60,9 +58,14 @@ void drawPowerButton() {
     }
 }
 
-void drawWiFiButton() {
+void drawWiFiButton(int wifiButtonColor) {
     Serial.println("TftUtils.hpp\t\t\tDraw WiFi button.");
-    tft.drawBitmap(10, 10, wifiIcon, 24, 24, WIFI_STATUS_COLOR[WiFi.status()]);
+    tft.drawBitmap(10, 10, wifiIcon, 24, 24, wifiButtonColor);
+    if (WiFi.getMode() == 2 || WiFi.getMode() == 3) {
+        tft.fillCircle(38, 24, 3, ILI9341_OLIVE);
+    } else {
+        tft.fillCircle(38, 24, 3, ILI9341_BLACK);
+    }
 }
 
 void updateTargetTemp() {
@@ -138,7 +141,7 @@ void drawMainScreen() {
     updateCircleColor();
     drawUpDownButton();
     drawPowerButton();
-    drawWiFiButton();
+    drawWiFiButton(ILI9341_ULTRA_DARKGREY);
     updateTargetTemp();
 }
 
@@ -188,7 +191,6 @@ void detectButtons(int x, int y) {
     }
     // wifi button
     else if (x <= 40 && y <= 40) {
-        tft.drawBitmap(10, 10, wifiIcon, 24, 24, ILI9341_YELLOW);
         thermostatData.toggleConnectivity();
         addEvent(EVENT_TYPES::CONNECTIVITY);
     }

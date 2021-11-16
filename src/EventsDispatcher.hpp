@@ -1,6 +1,8 @@
 #ifndef __EVENTS_DISPATCHER_H
 #define __EVENTS_DISPATCHER_H
 
+#include <ESP8266mDNS.h>
+
 #include <queue>
 
 #include "EventUtils.hpp"
@@ -9,7 +11,7 @@
 #include "ThermostatManager.hpp"
 #include "WiFiUtils.hpp"
 
-boolean lastConnectivityActive = thermostatData.isConectivityActive();
+boolean lastConnectivityActive = false;
 
 void manageRoomMeasuresEvent() {
     updateRoomTemp();
@@ -39,9 +41,9 @@ void manageActionEvent() {
 
 void manageConnectivityEvent() {
     if (lastConnectivityActive != thermostatData.isConectivityActive()) {
+        drawWiFiButton(WIFI_WORKING_COLOR);
         if (thermostatData.isConectivityActive()) {
             connectWiFi();
-            checkAndconnectToMqttServer();
             refreshMqttData(true);
         } else {
             disconnectMqtt();
@@ -49,7 +51,16 @@ void manageConnectivityEvent() {
         }
         lastConnectivityActive = thermostatData.isConectivityActive();
     }
-    drawWiFiButton();
+    drawWiFiButton(getWiFiStatusColor());
+}
+
+void manageWiFiConfigEvent() {
+    drawWiFiButton(WIFI_WORKING_COLOR);
+    writeWifiConfig();
+    connectWiFi_STA_fromConfig();
+    configMdns();
+    refreshMqttData(true);
+    drawWiFiButton(getWiFiStatusColor());
 }
 
 void dispatchEvent() {
@@ -74,6 +85,10 @@ void dispatchEvent() {
                     break;
                 case EVENT_TYPES::CONNECTIVITY:
                     manageConnectivityEvent();
+                    break;
+                case EVENT_TYPES::CONFIG_WIFI:
+                    manageWiFiConfigEvent();
+                    break;
                 default:
                     break;
             }
