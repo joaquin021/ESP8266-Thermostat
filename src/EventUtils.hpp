@@ -10,6 +10,7 @@ enum EVENT_TYPES { ROOM_MEASURES,
                    CONNECTIVITY,
                    CONFIG_WIFI,
                    CONFIG_MQTT,
+                   CONFIG_THERMOSTAT,
                    REBOOT,
                    RESET };
 

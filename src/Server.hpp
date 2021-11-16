@@ -119,6 +119,16 @@ void handleThermostatData() {
     server.on("/getThermostatData", []() {
         server.send(200, "application/json", thermostatData.toJson());
     });
+    server.on("/setThermostatConfig", []() {
+        thermostatData.setHotTolerance(server.arg("hotTolerance"));
+        thermostatData.setColdTolerance(server.arg("coldTolerance"));
+        thermostatData.setTemperatureStep(server.arg("temperatureStep"));
+        addEvent(EVENT_TYPES::CONFIG_THERMOSTAT);
+        server.sendHeader("Location", "/");
+        server.sendHeader("Cache-Control", "no-cache");
+        server.sendHeader("Set-Cookie", "ESPSESSIONID=1");
+        server.send(301);
+    });
 }
 
 void handleActions() {

@@ -56,10 +56,7 @@ void manageConnectivityEvent() {
 
 void manageWiFiConfigEvent() {
     drawWiFiButton(WIFI_WORKING_COLOR);
-    writeWifiConfig();
-    connectWiFi_STA_fromConfig();
-    WiFi.printDiag(Serial);
-    configMdns();
+    addWiFiConfigAndConnect();
     refreshMqttData(true);
     drawWiFiButton(getWiFiStatusColor());
 }
@@ -70,6 +67,10 @@ void manageConfigMqttEvent() {
     refreshMqttData(true);
 }
 
+void manageConfigThermostatEvent() {
+    thermostatData.writeThermostatConfig();
+}
+
 void manageRebootEvent() {
     ESP.restart();
 }
@@ -77,6 +78,7 @@ void manageRebootEvent() {
 void manageResetEvent() {
     deleteMqttConfig();
     deleteWiFiConfig();
+    thermostatData.deleteThermostatConfig();
     addEvent(EVENT_TYPES::REBOOT);
 }
 
@@ -108,6 +110,9 @@ void dispatchEvent() {
                     break;
                 case EVENT_TYPES::CONFIG_MQTT:
                     manageConfigMqttEvent();
+                    break;
+                case EVENT_TYPES::CONFIG_THERMOSTAT:
+                    manageConfigThermostatEvent();
                     break;
                 case EVENT_TYPES::REBOOT:
                     manageRebootEvent();

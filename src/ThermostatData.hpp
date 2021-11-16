@@ -14,18 +14,24 @@ class ThermostatData {
     String action = "off";
     char mode[5] = "off";
     bool connectivityActive = true;
+    bool existThermostatConfig();
+    void loadThermostatConfig();
 
    public:
+    ThermostatData();
     float getTemperature();
     void setTemperature(float newTemperature);
     float getHumidity();
     void setHumidity(float newHumidity);
     float getHotTolerance();
+    void setHotTolerance(String newHotTolerance);
     float getColdTolerance();
+    void setColdTolerance(String newColdTolerance);
     float getTargetTemp();
     void setTargetTemp(float newTargetTemp);
     void increaseTargetTemp();
     void decreaseTargetTemp();
+    void setTemperatureStep(String newTemperatureStep);
     String getAction();
     void setAction(String newAction);
     char *getMode();
@@ -33,6 +39,8 @@ class ThermostatData {
     void changeMode(uint8_t *newMode, unsigned int length);
     bool isConnectivityActive();
     bool toggleConnectivity();
+    void writeThermostatConfig();
+    void deleteThermostatConfig();
     String toJson();
 };
 

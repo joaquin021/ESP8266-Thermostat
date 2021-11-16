@@ -132,6 +132,13 @@ void connectWiFi() {
     lastWiFiStatus = WiFi.status();
 }
 
+void addWiFiConfigAndConnect() {
+    writeWifiConfig();
+    connectWiFi_STA_fromConfig();
+    configMdns();
+    WiFi.printDiag(Serial);
+}
+
 void disconnectWiFi() {
     Serial.println("WiFiUtils.hpp\t\t\tDisconnect WiFi.");
     WiFi.disconnect();

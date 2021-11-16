@@ -222,7 +222,7 @@ const char CONFIG_THERMOSTAT_HTML[] PROGMEM = R"=====(
     <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
         <header class="mdl-layout__header">
             <div class="mdl-layout__header-row">
-                <span class="mdl-layout-title">Sensor Config</span>
+                <span class="mdl-layout-title">Thermostat Config</span>
             </div>
         </header>
         <div class="mdl-layout__drawer">
@@ -238,20 +238,28 @@ const char CONFIG_THERMOSTAT_HTML[] PROGMEM = R"=====(
         </div>
         <main class="mdl-layout__content">
             <div class="page-content">
-                <form action="/setShtConfig" method="post">
+                <form action="/setThermostatConfig" method="post">
                     <div class="mdl-grid">
                         <div class="mdl-cell mdl-cell--12-col-desktop mdl-cell--8-col-tablet mdl-cell--4-col-phone">
                             <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                <input class="mdl-textfield__input" type="text" id="topicTemperature" name="topicTemperature">
-                                <label class="mdl-textfield__label" for="topicTemperature">Topic temperature</label>
+                                <input class="mdl-textfield__input" type="number" id="hotTolerance" name="hotTolerance">
+                                <label class="mdl-textfield__label" for="hotTolerance">Hot tolerance</label>
                             </div>
                         </div>
                     </div>
                     <div class="mdl-grid">
                         <div class="mdl-cell mdl-cell--12-col-desktop mdl-cell--8-col-tablet mdl-cell--4-col-phone">
                             <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                <input class="mdl-textfield__input" type="text" id="topicHumidity" name="topicHumidity">
-                                <label class="mdl-textfield__label" for="topicHumidity">Topic humidity</label>
+                                <input class="mdl-textfield__input" type="number" id="coldTolerance" name="coldTolerance">
+                                <label class="mdl-textfield__label" for="coldTolerance">Cold Tolerance</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mdl-grid">
+                        <div class="mdl-cell mdl-cell--12-col-desktop mdl-cell--8-col-tablet mdl-cell--4-col-phone">
+                            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                                <input class="mdl-textfield__input" type="number" id="temperatureStep" name="temperatureStep">
+                                <label class="mdl-textfield__label" for="temperatureStep">Temperature step</label>
                             </div>
                         </div>
                     </div>

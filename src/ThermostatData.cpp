@@ -1,6 +1,7 @@
 #include "ThermostatData.hpp"
 
 #include <Arduino.h>
+#include <LittleFS.h>
 
 #include <cstring>
 
@@ -14,7 +15,21 @@ void ThermostatData::setHumidity(float newHumidity) { humidity = newHumidity; }
 
 float ThermostatData::getHotTolerance() { return hotTolerance; }
 
+void ThermostatData::setHotTolerance(String newHotTolerance) {
+    if (!newHotTolerance.isEmpty()) {
+        Serial.println("ThermostatData.cpp\t\tSettig new hot tolerance.");
+        hotTolerance = atof(newHotTolerance.c_str());
+    }
+}
+
 float ThermostatData::getColdTolerance() { return coldTolerance; }
+
+void ThermostatData::setColdTolerance(String newColdTolerance) {
+    if (!newColdTolerance.isEmpty()) {
+        Serial.println("ThermostatData.cpp\t\tSettig new cold tolerance.");
+        coldTolerance = atof(newColdTolerance.c_str());
+    }
+}
 
 float ThermostatData::getTargetTemp() { return targetTemp; }
 
@@ -25,6 +40,13 @@ void ThermostatData::setTargetTemp(float newTargetTemp) {
 void ThermostatData::increaseTargetTemp() { targetTemp = targetTemp + temperatureStep; }
 
 void ThermostatData::decreaseTargetTemp() { targetTemp = targetTemp - temperatureStep; }
+
+void ThermostatData::setTemperatureStep(String newTemperatureStep) {
+    if (!newTemperatureStep.isEmpty()) {
+        Serial.println("ThermostatData.cpp\t\tSettig new temperature step.");
+        temperatureStep = atof(newTemperatureStep.c_str());
+    }
+}
 
 String ThermostatData::getAction() { return action; }
 
@@ -47,6 +69,45 @@ bool ThermostatData::isConnectivityActive() { return connectivityActive; }
 bool ThermostatData::toggleConnectivity() {
     connectivityActive = !connectivityActive;
     return connectivityActive;
+}
+
+bool ThermostatData::existThermostatConfig() {
+    return LittleFS.exists("/config/thermostat");
+}
+
+void ThermostatData::loadThermostatConfig() {
+    if (existThermostatConfig()) {
+        Serial.println("ThermostatData.cpp\t\tLoad thermostat config.");
+        File configThermostat = LittleFS.open("/config/thermostat", "r");
+        String newHotTolerance = configThermostat.readStringUntil('\n');
+        newHotTolerance.remove(newHotTolerance.length() - 1);
+        String newColdTolerance = configThermostat.readStringUntil('\n');
+        newColdTolerance.remove(newColdTolerance.length() - 1);
+        String newTemperatureStep = configThermostat.readStringUntil('\n');
+        newTemperatureStep.remove(newTemperatureStep.length() - 1);
+        configThermostat.close();
+        setHotTolerance(newHotTolerance);
+        setColdTolerance(newColdTolerance);
+        setTemperatureStep(newTemperatureStep);
+    }
+}
+
+void ThermostatData::writeThermostatConfig() {
+    Serial.println("ThermostatData.cpp\t\tWrite thermostat config.");
+    File configThermostat = LittleFS.open("/config/thermostat", "w+");
+    configThermostat.println(hotTolerance);
+    configThermostat.println(coldTolerance);
+    configThermostat.println(temperatureStep);
+    configThermostat.close();
+}
+
+void ThermostatData::deleteThermostatConfig() {
+    Serial.println("ThermostatData.cpp\t\tDelete thermostat config.");
+    LittleFS.remove("/config/thermostat");
+}
+
+ThermostatData::ThermostatData() {
+    loadThermostatConfig();
 }
 
 String ThermostatData::toJson() {
