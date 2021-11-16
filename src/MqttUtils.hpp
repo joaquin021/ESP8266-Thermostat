@@ -34,15 +34,40 @@ PubSubClient mqttClient(espClient);
 unsigned long NEXT_REFRESH_TIME = millis();
 unsigned long NEXT_REFRESH_PERIOD = 300000;
 
-String topicPrefix = "test-";
-String topicChangeMode = "thermostat/change/mode";
-String topicChangeTargetTemperature = "thermostat/change/targetTemperature";
-String topicTemperature = "thermostat/temperature";
-String topicHumidity = "thermostat/humidity";
-String topicTargetTemperature = "thermostat/targetTemperature";
-String topicAvailability = "thermostat/availability";
-String topicMode = "thermostat/mode";
-String topicAction = "thermostat/action";
+String topicPrefix = "";
+String newTopicPrefix = "";
+String changeModeTopic = "thermostat/change/mode";
+String changeTargetTemperatureTopic = "thermostat/change/targetTemperature";
+String temperatureTopic = "thermostat/temperature";
+String humidityTopic = "thermostat/humidity";
+String targetTemperatureTopic = "thermostat/targetTemperature";
+String availabilityTopic = "thermostat/availability";
+String modeTopic = "thermostat/mode";
+String actionTopic = "thermostat/action";
+
+boolean existTopicsConfig() {
+    return LittleFS.exists("/config/topics");
+}
+
+void loadTopicsConfig() {
+    if (existTopicsConfig()) {
+        Serial.println("MqttUtils.hpp\t\t\tLoad Topics config.");
+        File configTopics = LittleFS.open("/config/topics", "r");
+        topicPrefix = configTopics.readStringUntil('\n');
+        topicPrefix.remove(topicPrefix.length() - 1);
+        configTopics.close();
+    }
+}
+
+void writeTopicsConfig() {
+    if (!newTopicPrefix.equals("")) {
+        Serial.println("MqttUtils.hpp\t\t\tWrite Topics config.");
+        File configTopics = LittleFS.open("/config/topics", "w+");
+        configTopics.println(newTopicPrefix);
+        configTopics.close();
+        newTopicPrefix = "";
+    }
+}
 
 boolean existMqttConfig() {
     return LittleFS.exists("/config/mqtt");
@@ -50,7 +75,7 @@ boolean existMqttConfig() {
 
 void loadMqttConfig() {
     if (existMqttConfig()) {
-        Serial.println("WiFiUtils.hpp\t\t\tLoad Mqtt config.");
+        Serial.println("MqttUtils.hpp\t\t\tLoad Mqtt config.");
         actualMqttConfig = new MqttConfig();
         File configMqtt = LittleFS.open("/config/mqtt", "r");
         actualMqttConfig->server = configMqtt.readStringUntil('\n');
@@ -70,7 +95,7 @@ void loadMqttConfig() {
 
 void writeMqttConfig() {
     if (newMqttConfig != NULL) {
-        Serial.println("WiFiUtils.hpp\t\t\tWrite Mqtt config.");
+        Serial.println("MqttUtils.hpp\t\t\tWrite Mqtt config.");
         File configMqtt = LittleFS.open("/config/mqtt", "w+");
         configMqtt.println(newMqttConfig->server);
         configMqtt.println(newMqttConfig->port);
@@ -80,6 +105,7 @@ void writeMqttConfig() {
         configMqtt.close();
         newMqttConfig = NULL;
     }
+    writeTopicsConfig();
 }
 
 const char* getCompleteTopicName(String topic) {
@@ -91,10 +117,10 @@ const char* getCompleteTopicName(String topic) {
 
 void callback(char* topic, byte* payload, unsigned int length) {
     Serial.printf("MqttUtils.hpp\t\t\tMessage arrived [%s]\n", topic);
-    if (strcmp(topic, getCompleteTopicName(topicChangeMode)) == 0) {
+    if (strcmp(topic, getCompleteTopicName(changeModeTopic)) == 0) {
         thermostatData.changeMode(payload, length);
         addEvent(EVENT_TYPES::MODE);
-    } else if (strcmp(topic, getCompleteTopicName(topicChangeTargetTemperature)) == 0) {
+    } else if (strcmp(topic, getCompleteTopicName(changeTargetTemperatureTopic)) == 0) {
         char auxTargetTemp[length];
         memcpy(&auxTargetTemp, payload, length);
         auxTargetTemp[length] = '\0';
@@ -106,13 +132,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
 bool checkAndconnectToMqttServer() {
     if (WiFi.status() == WL_CONNECTED && (mqttClient.state() != 0 || !mqttClient.connected())) {
         loadMqttConfig();
+        loadTopicsConfig();
         if (actualMqttConfig != NULL) {
             Serial.println("MqttUtils.hpp\t\t\tAttempting MQTT connection...");
             mqttClient.setServer(actualMqttConfig->server.c_str(), actualMqttConfig->port);
             if (mqttClient.connect(actualMqttConfig->clientId.c_str(), actualMqttConfig->user.c_str(), actualMqttConfig->password.c_str())) {
                 Serial.println("MqttUtils.hpp\t\t\tConnected to MQTT server");
-                mqttClient.subscribe(getCompleteTopicName(topicChangeMode));
-                mqttClient.subscribe(getCompleteTopicName(topicChangeTargetTemperature));
+                mqttClient.subscribe(getCompleteTopicName(changeModeTopic));
+                mqttClient.subscribe(getCompleteTopicName(changeTargetTemperatureTopic));
                 mqttClient.setCallback(callback);
             } else {
                 Serial.printf("MqttUtils.hpp\t\t\tfailed, rc=%i\n", mqttClient.state());
@@ -122,11 +149,11 @@ bool checkAndconnectToMqttServer() {
     return mqttClient.connected();
 }
 
-void mqttPublish(const char* topic, const char* payload, bool ignoreConectivityStatus = false) {
-    if (ignoreConectivityStatus || thermostatData.isConectivityActive()) {
+void mqttPublish(String topic, const char* payload, bool ignoreConectivityStatus = false) {
+    if (ignoreConectivityStatus || thermostatData.isConnectivityActive()) {
         if (checkAndconnectToMqttServer()) {
-            mqttClient.publish(topic, payload);
-            Serial.printf("MqttUtils.hpp\t\t\tPublish message: %s in topic: %s\n", payload, topic);
+            mqttClient.publish(getCompleteTopicName(topic), payload);
+            Serial.printf("MqttUtils.hpp\t\t\tPublish message: %s in topic: %s\n", payload, getCompleteTopicName(topic));
         }
     }
 }
@@ -134,25 +161,25 @@ void mqttPublish(const char* topic, const char* payload, bool ignoreConectivityS
 void publishTemperature() {
     char temperature[6];
     dtostrf(thermostatData.getTemperature(), 5, 2, temperature);
-    mqttPublish(getCompleteTopicName(topicTemperature), temperature);
+    mqttPublish(temperatureTopic, temperature);
 }
 
 void publishHumidity() {
     char humidity[6];
     dtostrf(thermostatData.getHumidity(), 5, 2, humidity);
-    mqttPublish(getCompleteTopicName(topicHumidity), humidity);
+    mqttPublish(humidityTopic, humidity);
 }
 
 void publishTargetTemperature() {
     char temperature[6];
     dtostrf(thermostatData.getTargetTemp(), 5, 2, temperature);
-    mqttPublish(getCompleteTopicName(topicTargetTemperature), temperature);
+    mqttPublish(targetTemperatureTopic, temperature);
 }
 
 void publishStatus() {
-    mqttPublish(getCompleteTopicName(topicAvailability), "online");
-    mqttPublish(getCompleteTopicName(topicMode), thermostatData.getMode());
-    mqttPublish(getCompleteTopicName(topicAction), thermostatData.getAction().c_str());
+    mqttPublish(availabilityTopic, "online");
+    mqttPublish(modeTopic, thermostatData.getMode());
+    mqttPublish(actionTopic, thermostatData.getAction().c_str());
 }
 
 void refreshMqttData(bool force = false) {
@@ -167,7 +194,7 @@ void refreshMqttData(bool force = false) {
 
 void disconnectMqtt() {
     Serial.println("MqttUtils.hpp\t\t\tDisconnect Mqtt");
-    mqttPublish(getCompleteTopicName(topicAvailability), "offline", true);
+    mqttPublish(availabilityTopic, "offline", true);
     delay(500);
     mqttClient.disconnect();
     actualMqttConfig = NULL;
@@ -182,6 +209,19 @@ void deleteMqttConfig() {
     Serial.println("MqttUtils.hpp\t\t\tDelete Mqtt config.");
     disconnectMqtt();
     LittleFS.remove("/config/mqtt");
+    LittleFS.remove("/config/topics");
+}
+
+String getTopicsData() {
+    return String("{\"topicPrefix\": \"") + topicPrefix +
+           "\", \"changeModeTopic\": \"" + getCompleteTopicName(changeModeTopic) +
+           "\",\"changeTargetTemperatureTopic\": \"" + getCompleteTopicName(changeTargetTemperatureTopic) +
+           "\",\"temperatureTopic\": \"" + getCompleteTopicName(temperatureTopic) +
+           "\",\"humidityTopic\": \"" + getCompleteTopicName(humidityTopic) +
+           "\",\"targetTemperatureTopic\": \"" + getCompleteTopicName(targetTemperatureTopic) +
+           "\",\"availabilityTopic\": \"" + getCompleteTopicName(availabilityTopic) +
+           "\",\"modeTopic\": \"" + getCompleteTopicName(modeTopic) +
+           "\",\"actionTopic\": \"" + getCompleteTopicName(actionTopic) + "\"}";
 }
 
 #endif

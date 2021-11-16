@@ -30,7 +30,7 @@ void manageModeEvent() {
 }
 
 void manageActionEvent() {
-    if (thermostatData.getAction().compare("heating") == 0) {
+    if (thermostatData.getAction().equals("heating")) {
         thermostatHeating();
     } else {
         thermostatOff();
@@ -40,16 +40,16 @@ void manageActionEvent() {
 }
 
 void manageConnectivityEvent() {
-    if (lastConnectivityActive != thermostatData.isConectivityActive()) {
+    if (lastConnectivityActive != thermostatData.isConnectivityActive()) {
         drawWiFiButton(WIFI_WORKING_COLOR);
-        if (thermostatData.isConectivityActive()) {
+        if (thermostatData.isConnectivityActive()) {
             connectWiFi();
             refreshMqttData(true);
         } else {
             disconnectMqtt();
             disconnectWiFi();
         }
-        lastConnectivityActive = thermostatData.isConectivityActive();
+        lastConnectivityActive = thermostatData.isConnectivityActive();
     }
     drawWiFiButton(getWiFiStatusColor());
 }
@@ -76,7 +76,7 @@ void manageRebootEvent() {
 
 void manageResetEvent() {
     deleteMqttConfig();
-    //deleteWiFiConfig();
+    deleteWiFiConfig();
     addEvent(EVENT_TYPES::REBOOT);
 }
 

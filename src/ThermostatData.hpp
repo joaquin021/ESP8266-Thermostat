@@ -1,7 +1,7 @@
 #ifndef __THERMOSTAT_DATA_H
 #define __THERMOSTAT_DATA_H
 
-#include <string>
+#include <WString.h>
 
 class ThermostatData {
    private:
@@ -11,9 +11,9 @@ class ThermostatData {
     float coldTolerance = 0.5;
     float temperatureStep = 0.5;
     float targetTemp = 21;
-    std::string action = "off";
+    String action = "off";
     char mode[5] = "off";
-    bool conectivityActive = true;
+    bool connectivityActive = true;
 
    public:
     float getTemperature();
@@ -26,13 +26,14 @@ class ThermostatData {
     void setTargetTemp(float newTargetTemp);
     void increaseTargetTemp();
     void decreaseTargetTemp();
-    std::string getAction();
-    void setAction(std::string newAction);
+    String getAction();
+    void setAction(String newAction);
     char *getMode();
     void changeMode(const char *newMode, unsigned int length);
     void changeMode(uint8_t *newMode, unsigned int length);
-    bool isConectivityActive();
+    bool isConnectivityActive();
     bool toggleConnectivity();
+    String toJson();
 };
 
 #endif

@@ -3,7 +3,6 @@
 #include <Arduino.h>
 
 #include <cstring>
-using namespace std;
 
 float ThermostatData::getTemperature() { return temperature; }
 
@@ -27,9 +26,9 @@ void ThermostatData::increaseTargetTemp() { targetTemp = targetTemp + temperatur
 
 void ThermostatData::decreaseTargetTemp() { targetTemp = targetTemp - temperatureStep; }
 
-string ThermostatData::getAction() { return action; }
+String ThermostatData::getAction() { return action; }
 
-void ThermostatData::setAction(string newAction) { action = newAction; }
+void ThermostatData::setAction(String newAction) { action = newAction; }
 
 char *ThermostatData::getMode() { return mode; }
 
@@ -43,8 +42,21 @@ void ThermostatData::changeMode(uint8_t *newMode, unsigned int length) {
     mode[length] = '\0';
 }
 
-bool ThermostatData::isConectivityActive() { return conectivityActive; }
+bool ThermostatData::isConnectivityActive() { return connectivityActive; }
+
 bool ThermostatData::toggleConnectivity() {
-    conectivityActive = !conectivityActive;
-    return conectivityActive;
+    connectivityActive = !connectivityActive;
+    return connectivityActive;
+}
+
+String ThermostatData::toJson() {
+    return String("{\"temperature\": \"") + temperature +
+           "\", \"humidity\": \"" + humidity +
+           "\",\"hotTolerance\": \"" + hotTolerance +
+           "\",\"coldTolerance\": \"" + coldTolerance +
+           "\",\"temperatureStep\": \"" + temperatureStep +
+           "\",\"targetTemp\": \"" + targetTemp +
+           "\",\"action\": \"" + action +
+           "\",\"mode\": \"" + mode +
+           "\",\"connectivityActive\": \"" + connectivityActive + "\"}";
 }

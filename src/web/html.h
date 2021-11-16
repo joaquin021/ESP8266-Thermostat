@@ -28,9 +28,9 @@ const char MAIN_page[] PROGMEM = R"=====(
             <span class="mdl-layout-title">Thermostat Config</span>
             <nav class="mdl-navigation">
                 <a class="mdl-navigation__link" href="/">Home</a>
-                <a class="mdl-navigation__link" href="config-wifi.html">Config WiFi</a>
-                <a class="mdl-navigation__link" href="config-mqtt.html">Config MQTT</a>
-                <a class="mdl-navigation__link" href="config-sht.html">Config SHT</a>
+                <a class="mdl-navigation__link" href="config-wifi.html">WiFi Config</a>
+                <a class="mdl-navigation__link" href="config-mqtt.html">MQTT Config</a>
+                <a class="mdl-navigation__link" href="config-thermostat.html">Thermostat Config</a>
                 <a class="mdl-navigation__link" href="reboot.html">Reboot</a>
                 <a class="mdl-navigation__link" href="reset.html">Reset</a>
             </nav>
@@ -62,12 +62,33 @@ const char MAIN_page[] PROGMEM = R"=====(
                 </div>
                 <div class="mdl-grid">
                     <div class="mdl-cell mdl-cell--12-col">
-                        <h4>SHT Sensor</h4>
-                        <div id="shtConfig">
-                            <p><b>Topic temperature:</b> <span id="topicTemperature"></span></p>
-                            <p><b>Topic humidity:</b> <span id="topicHumidity"></span></p>
+                        <h4>Thermostat Data</h4>
+                        <div id="thermostatData">
                             <p><b>Temperature:</b> <span id="temperatureSensor"></span>ºC</p>
                             <p><b>Humidity:</b> <span id="humiditySensor"></span>%</p>
+                            <p><b>Hot tolerance:</b> <span id="hotToleranceData"></span>ºC</p>
+                            <p><b>Cold tolerance:</b> <span id="coldToleranceData"></span>ºC</p>
+                            <p><b>Temperature step:</b> <span id="temperatureStepData"></span>ºC</p>
+                            <p><b>Target temperature:</b> <span id="targetTempData"></span>ºC</p>
+                            <p><b>Action:</b> <span id="actionData"></span></p>
+                            <p><b>Mode:</b> <span id="modeData"></span></p>
+                            <p><b>Connectivity:</b> <span id="conectivityActiveData"></span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mdl-grid">
+                    <div class="mdl-cell mdl-cell--12-col">
+                        <h4>Topics Data</h4>
+                        <div id="topicsData">
+                            <p><b>Topic prefix:</b> <span id="topicPrefix"></span></p>
+                            <p><b>Temperature topic:</b> <span id="temperatureTopic"></span></p>
+                            <p><b>Humidity topic:</b> <span id="humidityTopic"></span></p>
+                            <p><b>Change mode topic:</b> <span id="changeModeTopic"></span></p>
+                            <p><b>Change target temperature topic:</b> <span id="changeTargetTemperatureTopic"></span></p>
+                            <p><b>Target temperature topic:</b> <span id="targetTemperatureTopic"></span></p>
+                            <p><b>Availability topic:</b> <span id="availabilityTopic"></span></p>
+                            <p><b>Mode topic:</b> <span id="modeTopic"></span></p>
+                            <p><b>Action topic:</b> <span id="actionTopic"></span></p>
                         </div>
                     </div>
                 </div>
@@ -109,9 +130,9 @@ const char CONFIG_MQTT_HTML[] PROGMEM = R"=====(
             <span class="mdl-layout-title">Thermostat Config</span>
             <nav class="mdl-navigation">
                 <a class="mdl-navigation__link" href="/">Home</a>
-                <a class="mdl-navigation__link" href="config-wifi.html">Config WiFi</a>
-                <a class="mdl-navigation__link" href="config-mqtt.html">Config MQTT</a>
-                <a class="mdl-navigation__link" href="config-sht.html">Config SHT</a>
+                <a class="mdl-navigation__link" href="config-wifi.html">WiFi Config</a>
+                <a class="mdl-navigation__link" href="config-mqtt.html">MQTT Config</a>
+                <a class="mdl-navigation__link" href="config-thermostat.html">Thermostat Config</a>
                 <a class="mdl-navigation__link" href="reboot.html">Reboot</a>
                 <a class="mdl-navigation__link" href="reset.html">Reset</a>
             </nav>
@@ -161,6 +182,14 @@ const char CONFIG_MQTT_HTML[] PROGMEM = R"=====(
                     </div>
                     <div class="mdl-grid">
                         <div class="mdl-cell mdl-cell--12-col-desktop mdl-cell--8-col-tablet mdl-cell--4-col-phone">
+                            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                                <input class="mdl-textfield__input" type="text" id="topicPrefix" name="topicPrefix">
+                                <label class="mdl-textfield__label" for="topicPrefix">Topic prefix</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mdl-grid">
+                        <div class="mdl-cell mdl-cell--12-col-desktop mdl-cell--8-col-tablet mdl-cell--4-col-phone">
                             <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" type="submit">Send</button>
                         </div>
                     </div>
@@ -173,7 +202,7 @@ const char CONFIG_MQTT_HTML[] PROGMEM = R"=====(
 </html>
 )=====";
 
-const char CONFIG_SHT_HTML[] PROGMEM = R"=====(
+const char CONFIG_THERMOSTAT_HTML[] PROGMEM = R"=====(
 <!DOCTYPE html>
 <html class="no-js" lang="">
 
@@ -200,9 +229,9 @@ const char CONFIG_SHT_HTML[] PROGMEM = R"=====(
             <span class="mdl-layout-title">Thermostat Config</span>
             <nav class="mdl-navigation">
                 <a class="mdl-navigation__link" href="/">Home</a>
-                <a class="mdl-navigation__link" href="config-wifi.html">Config WiFi</a>
-                <a class="mdl-navigation__link" href="config-mqtt.html">Config MQTT</a>
-                <a class="mdl-navigation__link" href="config-sht.html">Config SHT</a>
+                <a class="mdl-navigation__link" href="config-wifi.html">WiFi Config</a>
+                <a class="mdl-navigation__link" href="config-mqtt.html">MQTT Config</a>
+                <a class="mdl-navigation__link" href="config-thermostat.html">Thermostat Config</a>
                 <a class="mdl-navigation__link" href="reboot.html">Reboot</a>
                 <a class="mdl-navigation__link" href="reset.html">Reset</a>
             </nav>
@@ -267,9 +296,9 @@ const char CONFIG_WIFI_HTML[] PROGMEM = R"=====(
             <span class="mdl-layout-title">Thermostat Config</span>
             <nav class="mdl-navigation">
                 <a class="mdl-navigation__link" href="/">Home</a>
-                <a class="mdl-navigation__link" href="config-wifi.html">Config WiFi</a>
-                <a class="mdl-navigation__link" href="config-mqtt.html">Config MQTT</a>
-                <a class="mdl-navigation__link" href="config-sht.html">Config SHT</a>
+                <a class="mdl-navigation__link" href="config-wifi.html">WiFi Config</a>
+                <a class="mdl-navigation__link" href="config-mqtt.html">MQTT Config</a>
+                <a class="mdl-navigation__link" href="config-thermostat.html">Thermostat Config</a>
                 <a class="mdl-navigation__link" href="reboot.html">Reboot</a>
                 <a class="mdl-navigation__link" href="reset.html">Reset</a>
             </nav>
@@ -334,9 +363,9 @@ const char REBOOT_HTML[] PROGMEM = R"=====(
             <span class="mdl-layout-title">Thermostat Config</span>
             <nav class="mdl-navigation">
                 <a class="mdl-navigation__link" href="/">Home</a>
-                <a class="mdl-navigation__link" href="config-wifi.html">Config WiFi</a>
-                <a class="mdl-navigation__link" href="config-mqtt.html">Config MQTT</a>
-                <a class="mdl-navigation__link" href="config-sht.html">Config SHT</a>
+                <a class="mdl-navigation__link" href="config-wifi.html">WiFi Config</a>
+                <a class="mdl-navigation__link" href="config-mqtt.html">MQTT Config</a>
+                <a class="mdl-navigation__link" href="config-thermostat.html">Thermostat Config</a>
                 <a class="mdl-navigation__link" href="reboot.html">Reboot</a>
                 <a class="mdl-navigation__link" href="reset.html">Reset</a>
             </nav>
@@ -385,9 +414,9 @@ const char RESET_HTML[] PROGMEM = R"=====(
             <span class="mdl-layout-title">Thermostat Config</span>
             <nav class="mdl-navigation">
                 <a class="mdl-navigation__link" href="/">Home</a>
-                <a class="mdl-navigation__link" href="config-wifi.html">Config WiFi</a>
-                <a class="mdl-navigation__link" href="config-mqtt.html">Config MQTT</a>
-                <a class="mdl-navigation__link" href="config-sht.html">Config SHT</a>
+                <a class="mdl-navigation__link" href="config-wifi.html">WiFi Config</a>
+                <a class="mdl-navigation__link" href="config-mqtt.html">MQTT Config</a>
+                <a class="mdl-navigation__link" href="config-thermostat.html">Thermostat Config</a>
                 <a class="mdl-navigation__link" href="reboot.html">Reboot</a>
                 <a class="mdl-navigation__link" href="reset.html">Reset</a>
             </nav>

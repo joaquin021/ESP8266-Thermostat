@@ -48,22 +48,51 @@ function getMqttConfig() {
     xmlhttp.send();
 }
 
-function getShtConfig() {
+function getTopicsData() {
     var xmlhttp = new XMLHttpRequest();
 
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == XMLHttpRequest.DONE) {
             if (xmlhttp.status == 200) {
                 var response = JSON.parse(xmlhttp.responseText);
-                document.getElementById("topicTemperature").innerHTML = response.topicTemperature;
-                document.getElementById("topicHumidity").innerHTML = response.topicHumidity;
-                document.getElementById("temperatureSensor").innerHTML = response.temperature;
-                document.getElementById("humiditySensor").innerHTML = response.humidity;
+                document.getElementById("topicPrefix").innerHTML = response.topicPrefix;
+                document.getElementById("temperatureTopic").innerHTML = response.temperatureTopic;
+                document.getElementById("humidityTopic").innerHTML = response.humidityTopic;
+                document.getElementById("changeModeTopic").innerHTML = response.changeModeTopic;
+                document.getElementById("changeTargetTemperatureTopic").innerHTML = response.changeTargetTemperatureTopic;
+                document.getElementById("targetTemperatureTopic").innerHTML = response.targetTemperatureTopic;
+                document.getElementById("availabilityTopic").innerHTML = response.availabilityTopic;
+                document.getElementById("modeTopic").innerHTML = response.modeTopic;
+                document.getElementById("actionTopic").innerHTML = response.actionTopic;
             } 
         }
     };
 
-    xmlhttp.open("GET", "getShtConfig", true);
+    xmlhttp.open("GET", "getTopicsData", true);
+    xmlhttp.send();
+}
+
+function getThermostatData() {
+    var xmlhttp = new XMLHttpRequest();
+
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == XMLHttpRequest.DONE) {
+            if (xmlhttp.status == 200) {
+                var response = JSON.parse(xmlhttp.responseText);
+                document.getElementById("temperatureSensor").innerHTML = response.temperature;
+                document.getElementById("humiditySensor").innerHTML = response.humidity;
+                document.getElementById("hotToleranceData").innerHTML = response.hotTolerance;
+                document.getElementById("coldToleranceData").innerHTML = response.coldTolerance;
+                document.getElementById("temperatureStepData").innerHTML = response.temperatureStep;
+                document.getElementById("targetTempData").innerHTML = response.targetTemp;
+                document.getElementById("actionData").innerHTML = response.action;
+                document.getElementById("modeData").innerHTML = response.mode;
+                document.getElementById("conectivityActiveData").innerHTML = response.connectivityActive;
+            } 
+        }
+    };
+
+    xmlhttp.open("GET", "getThermostatData", true);
     xmlhttp.send();
 }
 
@@ -90,7 +119,8 @@ function updateMqttStatusElement(mqttStatus) {
 (function scheduleAjax() {
     checkWifiStatus();
     checkMqttStatus();
-    //getShtConfig();
+    getTopicsData();
+    getThermostatData();
     setTimeout(scheduleAjax, 60000);
 })();
 )=====";

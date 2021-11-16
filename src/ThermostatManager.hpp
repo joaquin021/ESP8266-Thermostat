@@ -15,17 +15,17 @@ boolean temperatureBelowTarget() {
 
 void checkThermostatStatus() {
     if (strcmp(thermostatData.getMode(), "heat") == 0) {
-        if (thermostatData.getAction().compare("idle") != 0 && temperatureAboveTarget()) {
+        if (!thermostatData.getAction().equals("idle") && temperatureAboveTarget()) {
             thermostatData.setAction("idle");
             addEvent(EVENT_TYPES::ACTION);
-        } else if (thermostatData.getAction().compare("heating") != 0 && temperatureBelowTarget()) {
+        } else if (!thermostatData.getAction().equals("heating") && temperatureBelowTarget()) {
             thermostatData.setAction("heating");
             addEvent(EVENT_TYPES::ACTION);
-        } else if (thermostatData.getAction().compare("off") == 0) {
+        } else if (thermostatData.getAction().equals("off")) {
             thermostatData.setAction("idle");
             addEvent(EVENT_TYPES::ACTION);
         }
-    } else if (thermostatData.getAction().compare("off") != 0) {
+    } else if (!thermostatData.getAction().equals("off")) {
         thermostatData.setAction("off");
         addEvent(EVENT_TYPES::ACTION);
     }

@@ -103,11 +103,21 @@ void handleMqttConfig() {
         newMqttConfig->clientId = server.arg("clientIdMqtt");
         newMqttConfig->user = server.arg("userMqtt");
         newMqttConfig->password = server.arg("passwordMqtt");
+        newTopicPrefix = server.arg("topicPrefix");
         addEvent(EVENT_TYPES::CONFIG_MQTT);
         server.sendHeader("Location", "/");
         server.sendHeader("Cache-Control", "no-cache");
         server.sendHeader("Set-Cookie", "ESPSESSIONID=1");
         server.send(301);
+    });
+    server.on("/getTopicsData", []() {
+        server.send(200, "application/json", getTopicsData());
+    });
+}
+
+void handleThermostatData() {
+    server.on("/getThermostatData", []() {
+        server.send(200, "application/json", thermostatData.toJson());
     });
 }
 
@@ -135,6 +145,7 @@ void initServer() {
     handleVendor();
     handleWiFiConfig();
     handleMqttConfig();
+    handleThermostatData();
     handleActions();
     server.onNotFound(handleNotFound);
     server.begin();

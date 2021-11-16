@@ -116,7 +116,7 @@ void configMdns() {
 }
 
 void connectWiFi() {
-    if (thermostatData.isConectivityActive()) {
+    if (thermostatData.isConnectivityActive()) {
         configWiFi();
         connectWiFi_STA_fromFlash();
         if (WiFi.status() != WL_CONNECTED) {

@@ -100,10 +100,10 @@ void updateCircleColor() {
     Serial.println("TftUtils.hpp\t\t\tDraw circles color.");
     //draw big circle
     unsigned char i;
-    if (thermostatData.getAction().compare("heating") == 0) {
+    if (thermostatData.getAction().equals("heating")) {
         for (i = 0; i < 10; i++)
             tft.drawCircle(120, 120, 80 + i, ILI9341_RED);
-    } else if (thermostatData.getAction().compare("idle") == 0) {
+    } else if (thermostatData.getAction().equals("idle")) {
         for (i = 0; i < 10; i++)
             tft.drawCircle(120, 120, 80 + i, ILI9341_GREEN);
     } else {
