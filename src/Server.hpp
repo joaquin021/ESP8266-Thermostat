@@ -23,6 +23,12 @@ void handleHtml() {
     server.on("/config-wifi.html", []() {
         server.send_P(200, "text/html", CONFIG_WIFI_HTML);
     });
+    server.on("/reboot.html", []() {
+        server.send_P(200, "text/html", REBOOT_HTML);
+    });
+    server.on("/reset.html", []() {
+        server.send_P(200, "text/html", RESET_HTML);
+    });
     server.on("/favicon.ico", []() {
         server.send_P(200, "image/x-icon", FAVICON, sizeof(FAVICON));
     });
@@ -79,12 +85,30 @@ void handleWiFiConfig() {
     });
 }
 
+void handleActions() {
+    server.on("/reboot", []() {
+        addEvent(EVENT_TYPES::REBOOT);
+        server.sendHeader("Location", "/");
+        server.sendHeader("Cache-Control", "no-cache");
+        server.sendHeader("Set-Cookie", "ESPSESSIONID=1");
+        server.send(301);
+    });
+    server.on("/reset", []() {
+        addEvent(EVENT_TYPES::RESET);
+        server.sendHeader("Location", "/");
+        server.sendHeader("Cache-Control", "no-cache");
+        server.sendHeader("Set-Cookie", "ESPSESSIONID=1");
+        server.send(301);
+    });
+}
+
 void initServer() {
     handleHtml();
     handleAsset();
     handleLib();
     handleVendor();
     handleWiFiConfig();
+    handleActions();
     server.onNotFound(handleNotFound);
     server.begin();
     Serial.println("Server.hpp\t\t\tHTTP server started.");

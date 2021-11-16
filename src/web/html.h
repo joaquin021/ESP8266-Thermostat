@@ -44,7 +44,7 @@ const char MAIN_page[] PROGMEM = R"=====(
                         <div style="display: none" id="wifiConfig">
                             <p><b>SSID:</b> <span id="wifiSSID"></span></p>
                             <p><b>IP:</b> <span id="wifiIP"></span></p>
-                            <p style="display: none" id="softAPMessage"><span>To turn off the internal access point reboot the device or toggle WiFi button.</span></p>
+                            <p style="display: none" id="softAPMessage"><span>To turn off the internal access point <a href="reboot.html">reboot</a> the device or toggle WiFi button.</span></p>
                         </div>
                     </div>
                 </div>
@@ -307,7 +307,7 @@ const char CONFIG_WIFI_HTML[] PROGMEM = R"=====(
 </html>
 )=====";
 
-const char REBOOT[] PROGMEM = R"=====(
+const char REBOOT_HTML[] PROGMEM = R"=====(
 <!DOCTYPE html>
 <html class="no-js" lang="">
 
@@ -358,7 +358,7 @@ const char REBOOT[] PROGMEM = R"=====(
 </html>
 )=====";
 
-const char RESET[] PROGMEM = R"=====(
+const char RESET_HTML[] PROGMEM = R"=====(
 <!DOCTYPE html>
 <html class="no-js" lang="">
 

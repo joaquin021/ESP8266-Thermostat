@@ -41,6 +41,12 @@ void writeWifiConfig() {
     configWifi.close();
 }
 
+void deleteWiFiConfig() {
+    Serial.println("WiFiUtils.hpp\t\t\tDelete WiFi config.");
+    LittleFS.remove("/config/wifi");
+    WiFi.disconnect();
+}
+
 void checkConnectionWiFi_STA() {
     if (WiFi.waitForConnectResult() == WL_CONNECTED) {
         Serial.println("WiFiUtils.hpp\t\t\tSTA running:\t" + ssid);
@@ -70,10 +76,10 @@ void connectWiFi_STA_fromConfig() {
         WiFi.begin(ssid, password);
         checkConnectionWiFi_STA();
         if (WiFi.status() != WL_CONNECTED) {
-            LittleFS.remove("/config/wifi");
+            deleteWiFiConfig();
         }
     } else {
-        Serial.println("WiFiUtils.hpp\t\t\tNo configuration found for wifi connection");
+        Serial.println("WiFiUtils.hpp\t\t\tNo configuration found for WiFi connection");
     }
 }
 
@@ -101,7 +107,6 @@ void configWiFi() {
     WiFi.setAutoConnect(true);
     WiFi.setAutoReconnect(true);
     WiFi.persistent(true);
-    WiFi.printDiag(Serial);
 }
 
 void configMdns() {
@@ -121,6 +126,7 @@ void connectWiFi() {
             }
         }
         configMdns();
+        WiFi.printDiag(Serial);
     }
     addEvent(EVENT_TYPES::CONNECTIVITY);
     lastWiFiStatus = WiFi.status();

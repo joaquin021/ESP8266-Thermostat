@@ -8,7 +8,9 @@ enum EVENT_TYPES { ROOM_MEASURES,
                    MODE,
                    ACTION,
                    CONNECTIVITY,
-                   CONFIG_WIFI };
+                   CONFIG_WIFI,
+                   REBOOT,
+                   RESET };
 
 String EVENT_TYPES_DESCRIPTION[] = {"ROOM_MEASURES", "TARGET_TEMPERATURE", "MODE", "ACTION", "CONECTIVITY", "CONFIG_WIFI"};
 

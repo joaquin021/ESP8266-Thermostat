@@ -58,9 +58,19 @@ void manageWiFiConfigEvent() {
     drawWiFiButton(WIFI_WORKING_COLOR);
     writeWifiConfig();
     connectWiFi_STA_fromConfig();
+    WiFi.printDiag(Serial);
     configMdns();
     refreshMqttData(true);
     drawWiFiButton(getWiFiStatusColor());
+}
+
+void manageRebootEvent() {
+    ESP.restart();
+}
+
+void manageResetEvent() {
+    deleteWiFiConfig();
+    addEvent(EVENT_TYPES::REBOOT);
 }
 
 void dispatchEvent() {
@@ -88,6 +98,12 @@ void dispatchEvent() {
                     break;
                 case EVENT_TYPES::CONFIG_WIFI:
                     manageWiFiConfigEvent();
+                    break;
+                case EVENT_TYPES::REBOOT:
+                    manageRebootEvent();
+                    break;
+                case EVENT_TYPES::RESET:
+                    manageResetEvent();
                     break;
                 default:
                     break;
