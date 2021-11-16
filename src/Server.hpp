@@ -4,6 +4,7 @@
 #include <ESP8266WebServer.h>
 
 #include "EventUtils.hpp"
+#include "MqttUtils.hpp"
 #include "WiFiUtils.hpp"
 #include "web/asset.h"
 #include "web/html.h"
@@ -22,6 +23,9 @@ void handleHtml() {
     });
     server.on("/config-wifi.html", []() {
         server.send_P(200, "text/html", CONFIG_WIFI_HTML);
+    });
+    server.on("/config-mqtt.html", []() {
+        server.send_P(200, "text/html", CONFIG_MQTT_HTML);
     });
     server.on("/reboot.html", []() {
         server.send_P(200, "text/html", REBOOT_HTML);
@@ -85,6 +89,28 @@ void handleWiFiConfig() {
     });
 }
 
+void handleMqttConfig() {
+    server.on("/checkMqttStatus", []() {
+        server.send(200, "text/plain", getMqttStatus());
+    });
+    server.on("/getMqttConfig", []() {
+        server.send(200, "application/json", actualMqttConfig->toJson());
+    });
+    server.on("/setMqttConfig", []() {
+        newMqttConfig = new MqttConfig();
+        newMqttConfig->server = server.arg("serverMqtt");
+        newMqttConfig->port = atoi(server.arg("portMqtt").c_str());
+        newMqttConfig->clientId = server.arg("clientIdMqtt");
+        newMqttConfig->user = server.arg("userMqtt");
+        newMqttConfig->password = server.arg("passwordMqtt");
+        addEvent(EVENT_TYPES::CONFIG_MQTT);
+        server.sendHeader("Location", "/");
+        server.sendHeader("Cache-Control", "no-cache");
+        server.sendHeader("Set-Cookie", "ESPSESSIONID=1");
+        server.send(301);
+    });
+}
+
 void handleActions() {
     server.on("/reboot", []() {
         addEvent(EVENT_TYPES::REBOOT);
@@ -108,6 +134,7 @@ void initServer() {
     handleLib();
     handleVendor();
     handleWiFiConfig();
+    handleMqttConfig();
     handleActions();
     server.onNotFound(handleNotFound);
     server.begin();

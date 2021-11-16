@@ -155,7 +155,6 @@ void initTft() {
 
 bool touchEvent() {
     tsPoint = touch.getPoint();
-    delay(1);
     if (tsPoint.z > MINPRESSURE) {
         tsPoint.x = map(tsPoint.x, TS_MINX, TS_MAXX, 0, 320);
         tsPoint.y = map(tsPoint.y, TS_MINY, TS_MAXY, 0, 240);
@@ -173,7 +172,7 @@ void detectButtons(int x, int y) {
                 thermostatData.increaseTargetTemp();
                 addEvent(EVENT_TYPES::TARGET_TEMPERATURE);
             }
-        } else if (y >= 200 && y <= 240) {
+        } else if (y >= 190 && y <= 250) {
             if (thermostatData.getTargetTemp() > MIN_TEMPERATURE) {
                 thermostatData.decreaseTargetTemp();
                 addEvent(EVENT_TYPES::TARGET_TEMPERATURE);

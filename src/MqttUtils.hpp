@@ -2,9 +2,31 @@
 #define __MQTT_UTILS_H
 
 #include <ESP8266WiFi.h>
+#include <LittleFS.h>
 #include <PubSubClient.h>
 
 #include "EventUtils.hpp"
+
+String MQTT_STATUS_POSITIVE[] = {"MQTT_CONNECTED", "MQTT_CONNECT_BAD_PROTOCOL", "MQTT_CONNECT_BAD_CLIENT_ID", "MQTT_CONNECT_UNAVAILABLE", "MQTT_CONNECT_BAD_CREDENTIALS", "MQTT_CONNECT_UNAUTHORIZED"};
+String MQTT_STATUS_NEGATIVE[] = {"", "MQTT_DISCONNECTED", "MQTT_CONNECT_FAILED", "MQTT_CONNECTION_LOST", "MQTT_CONNECTION_TIMEOUT"};
+
+class MqttConfig {
+   public:
+    String server;
+    int port;
+    String clientId;
+    String user;
+    String password;
+
+    String toJson() {
+        return String("{\"server\": \"") + server +
+               "\", \"port\": \"" + port +
+               "\",\"clientId\": \"" + clientId +
+               "\",\"user\": \"" + user + "\"}";
+    }
+};
+MqttConfig* actualMqttConfig = NULL;
+MqttConfig* newMqttConfig = NULL;
 
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
@@ -12,15 +34,53 @@ PubSubClient mqttClient(espClient);
 unsigned long NEXT_REFRESH_TIME = millis();
 unsigned long NEXT_REFRESH_PERIOD = 300000;
 
-String topicPrefix = "thermostat2/";
-String topicChangeMode = "change/mode";
-String topicChangeTargetTemperature = "change/targetTemperature";
-String topicTemperature = "temperature";
-String topicHumidity = "humidity";
-String topicTargetTemperature = "targetTemperature";
-String topicAvailability = "availability";
-String topicMode = "mode";
-String topicAction = "action";
+String topicPrefix = "test-";
+String topicChangeMode = "thermostat/change/mode";
+String topicChangeTargetTemperature = "thermostat/change/targetTemperature";
+String topicTemperature = "thermostat/temperature";
+String topicHumidity = "thermostat/humidity";
+String topicTargetTemperature = "thermostat/targetTemperature";
+String topicAvailability = "thermostat/availability";
+String topicMode = "thermostat/mode";
+String topicAction = "thermostat/action";
+
+boolean existMqttConfig() {
+    return LittleFS.exists("/config/mqtt");
+}
+
+void loadMqttConfig() {
+    if (existMqttConfig()) {
+        Serial.println("WiFiUtils.hpp\t\t\tLoad Mqtt config.");
+        actualMqttConfig = new MqttConfig();
+        File configMqtt = LittleFS.open("/config/mqtt", "r");
+        actualMqttConfig->server = configMqtt.readStringUntil('\n');
+        actualMqttConfig->server.remove(actualMqttConfig->server.length() - 1);
+        String port = configMqtt.readStringUntil('\n');
+        port.remove(port.length() - 1);
+        actualMqttConfig->port = atoi(port.c_str());
+        actualMqttConfig->clientId = configMqtt.readStringUntil('\n');
+        actualMqttConfig->clientId.remove(actualMqttConfig->clientId.length() - 1);
+        actualMqttConfig->user = configMqtt.readStringUntil('\n');
+        actualMqttConfig->user.remove(actualMqttConfig->user.length() - 1);
+        actualMqttConfig->password = configMqtt.readStringUntil('\n');
+        actualMqttConfig->password.remove(actualMqttConfig->password.length() - 1);
+        configMqtt.close();
+    }
+}
+
+void writeMqttConfig() {
+    if (newMqttConfig != NULL) {
+        Serial.println("WiFiUtils.hpp\t\t\tWrite Mqtt config.");
+        File configMqtt = LittleFS.open("/config/mqtt", "w+");
+        configMqtt.println(newMqttConfig->server);
+        configMqtt.println(newMqttConfig->port);
+        configMqtt.println(newMqttConfig->clientId);
+        configMqtt.println(newMqttConfig->user);
+        configMqtt.println(newMqttConfig->password);
+        configMqtt.close();
+        newMqttConfig = NULL;
+    }
+}
 
 const char* getCompleteTopicName(String topic) {
     if (!topicPrefix.equals("")) {
@@ -45,18 +105,17 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 bool checkAndconnectToMqttServer() {
     if (WiFi.status() == WL_CONNECTED && (mqttClient.state() != 0 || !mqttClient.connected())) {
-        Serial.println("MqttUtils.hpp\t\t\tAttempting MQTT connection...");
-        mqttClient.setServer("192.168.1.21", 1883);
-        for (int i = 0; i < 5 && !mqttClient.connected(); i++) {
-            Serial.printf("MqttUtils.hpp\t\t\tAttemping %i\n", i);
-            if (mqttClient.connect("ESP8266_Thermostat2", "mqtt_user", "pass")) {
+        loadMqttConfig();
+        if (actualMqttConfig != NULL) {
+            Serial.println("MqttUtils.hpp\t\t\tAttempting MQTT connection...");
+            mqttClient.setServer(actualMqttConfig->server.c_str(), actualMqttConfig->port);
+            if (mqttClient.connect(actualMqttConfig->clientId.c_str(), actualMqttConfig->user.c_str(), actualMqttConfig->password.c_str())) {
                 Serial.println("MqttUtils.hpp\t\t\tConnected to MQTT server");
                 mqttClient.subscribe(getCompleteTopicName(topicChangeMode));
                 mqttClient.subscribe(getCompleteTopicName(topicChangeTargetTemperature));
                 mqttClient.setCallback(callback);
             } else {
                 Serial.printf("MqttUtils.hpp\t\t\tfailed, rc=%i\n", mqttClient.state());
-                delay(1000);
             }
         }
     }
@@ -107,10 +166,22 @@ void refreshMqttData(bool force = false) {
 }
 
 void disconnectMqtt() {
+    Serial.println("MqttUtils.hpp\t\t\tDisconnect Mqtt");
     mqttPublish(getCompleteTopicName(topicAvailability), "offline", true);
     delay(500);
-    Serial.println("MqttUtils.hpp\t\t\tDisconnect Mqtt");
     mqttClient.disconnect();
+    actualMqttConfig = NULL;
+}
+
+String getMqttStatus() {
+    int statusCode = mqttClient.state();
+    return statusCode < 0 ? MQTT_STATUS_NEGATIVE[statusCode * -1] : MQTT_STATUS_POSITIVE[statusCode];
+}
+
+void deleteMqttConfig() {
+    Serial.println("MqttUtils.hpp\t\t\tDelete Mqtt config.");
+    disconnectMqtt();
+    LittleFS.remove("/config/mqtt");
 }
 
 #endif

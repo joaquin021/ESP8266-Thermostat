@@ -64,12 +64,19 @@ void manageWiFiConfigEvent() {
     drawWiFiButton(getWiFiStatusColor());
 }
 
+void manageConfigMqttEvent() {
+    disconnectMqtt();
+    writeMqttConfig();
+    refreshMqttData(true);
+}
+
 void manageRebootEvent() {
     ESP.restart();
 }
 
 void manageResetEvent() {
-    deleteWiFiConfig();
+    deleteMqttConfig();
+    //deleteWiFiConfig();
     addEvent(EVENT_TYPES::REBOOT);
 }
 
@@ -98,6 +105,9 @@ void dispatchEvent() {
                     break;
                 case EVENT_TYPES::CONFIG_WIFI:
                     manageWiFiConfigEvent();
+                    break;
+                case EVENT_TYPES::CONFIG_MQTT:
+                    manageConfigMqttEvent();
                     break;
                 case EVENT_TYPES::REBOOT:
                     manageRebootEvent();

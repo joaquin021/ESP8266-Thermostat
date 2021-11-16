@@ -89,7 +89,7 @@ function updateMqttStatusElement(mqttStatus) {
 
 (function scheduleAjax() {
     checkWifiStatus();
-    //checkMqttStatus();
+    checkMqttStatus();
     //getShtConfig();
     setTimeout(scheduleAjax, 60000);
 })();

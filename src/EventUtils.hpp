@@ -9,6 +9,7 @@ enum EVENT_TYPES { ROOM_MEASURES,
                    ACTION,
                    CONNECTIVITY,
                    CONFIG_WIFI,
+                   CONFIG_MQTT,
                    REBOOT,
                    RESET };
 

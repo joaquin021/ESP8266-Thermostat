@@ -130,7 +130,7 @@ const char CONFIG_MQTT_HTML[] PROGMEM = R"=====(
                     <div class="mdl-grid">
                         <div class="mdl-cell mdl-cell--12-col-desktop mdl-cell--8-col-tablet mdl-cell--4-col-phone">
                             <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                <input class="mdl-textfield__input" type="number" id="port" name="portMqtt">
+                                <input class="mdl-textfield__input" type="number" id="port" name="portMqtt" value="1883">
                                 <label class="mdl-textfield__label" for="port">Port</label>
                             </div>
                         </div>
