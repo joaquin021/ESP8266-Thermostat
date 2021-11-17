@@ -11,8 +11,6 @@
 #include "ThermostatManager.hpp"
 #include "WiFiUtils.hpp"
 
-boolean lastConnectivityActive = false;
-
 void manageRoomMeasuresEvent() {
     updateRoomTemp();
     publishTemperature();
@@ -40,25 +38,23 @@ void manageActionEvent() {
 }
 
 void manageConnectivityEvent() {
-    if (lastConnectivityActive != thermostatData.isConnectivityActive()) {
-        drawWiFiButton(WIFI_WORKING_COLOR);
-        if (thermostatData.isConnectivityActive()) {
-            connectWiFi();
-            refreshMqttData(true);
-        } else {
-            disconnectMqtt();
-            disconnectWiFi();
-        }
-        lastConnectivityActive = thermostatData.isConnectivityActive();
+    drawWiFiButton(WIFI_WORKING_COLOR);
+    if (thermostatData.isConnectivityActive()) {
+        connectWiFi();
+    } else {
+        disconnectMqtt();
+        disconnectWiFi();
     }
+}
+
+void manageWiFiChangeStatusEvent() {
     drawWiFiButton(getWiFiStatusColor());
+    refreshMqttData(true);
 }
 
 void manageWiFiConfigEvent() {
     drawWiFiButton(WIFI_WORKING_COLOR);
     addWiFiConfigAndConnect();
-    refreshMqttData(true);
-    drawWiFiButton(getWiFiStatusColor());
 }
 
 void manageConfigMqttEvent() {
@@ -104,6 +100,9 @@ void dispatchEvent() {
                     break;
                 case EVENT_TYPES::CONNECTIVITY:
                     manageConnectivityEvent();
+                    break;
+                case EVENT_TYPES::WIFI_CHANGE_STATUS:
+                    manageWiFiChangeStatusEvent();
                     break;
                 case EVENT_TYPES::CONFIG_WIFI:
                     manageWiFiConfigEvent();

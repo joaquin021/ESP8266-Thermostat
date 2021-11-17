@@ -102,6 +102,11 @@ void connectWiFi_AP() {
     Serial.println(WiFi.softAPIP());
 }
 
+void updateWiFiStatus() {
+    addEvent(EVENT_TYPES::WIFI_CHANGE_STATUS);
+    lastWiFiStatus = WiFi.status();
+}
+
 void configWiFi() {
     WiFi.mode(WIFI_STA);
     WiFi.setAutoConnect(true);
@@ -128,8 +133,7 @@ void connectWiFi() {
         configMdns();
         WiFi.printDiag(Serial);
     }
-    addEvent(EVENT_TYPES::CONNECTIVITY);
-    lastWiFiStatus = WiFi.status();
+    updateWiFiStatus();
 }
 
 void addWiFiConfigAndConnect() {
@@ -137,6 +141,7 @@ void addWiFiConfigAndConnect() {
     connectWiFi_STA_fromConfig();
     configMdns();
     WiFi.printDiag(Serial);
+    updateWiFiStatus();
 }
 
 void disconnectWiFi() {
@@ -144,13 +149,12 @@ void disconnectWiFi() {
     WiFi.disconnect();
     WiFi.softAPdisconnect(true);
     lastWiFiConnectionErrorStatus = -1;
-    lastWiFiStatus = WiFi.status();
+    updateWiFiStatus();
 }
 
 void checkIfWiFiStatusHasChanged() {
     if (WiFi.status() != lastWiFiStatus) {
-        addEvent(EVENT_TYPES::CONNECTIVITY);
-        lastWiFiStatus = WiFi.status();
+        updateWiFiStatus();
         if (WiFi.status() == WL_CONNECTED) {
             lastWiFiConnectionErrorStatus = -1;
         }

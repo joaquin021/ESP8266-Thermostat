@@ -68,6 +68,7 @@ bool ThermostatData::isConnectivityActive() { return connectivityActive; }
 
 bool ThermostatData::toggleConnectivity() {
     connectivityActive = !connectivityActive;
+    writeThermostatConfig();
     return connectivityActive;
 }
 
@@ -85,6 +86,9 @@ void ThermostatData::loadThermostatConfig() {
         newColdTolerance.remove(newColdTolerance.length() - 1);
         String newTemperatureStep = configThermostat.readStringUntil('\n');
         newTemperatureStep.remove(newTemperatureStep.length() - 1);
+        String newConnectivityActive = configThermostat.readStringUntil('\n');
+        newConnectivityActive.remove(newConnectivityActive.length() - 1);
+        connectivityActive = atoi(newConnectivityActive.c_str()) != 0;
         configThermostat.close();
         setHotTolerance(newHotTolerance);
         setColdTolerance(newColdTolerance);
@@ -98,6 +102,7 @@ void ThermostatData::writeThermostatConfig() {
     configThermostat.println(hotTolerance);
     configThermostat.println(coldTolerance);
     configThermostat.println(temperatureStep);
+    configThermostat.println(connectivityActive);
     configThermostat.close();
 }
 
