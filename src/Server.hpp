@@ -27,6 +27,9 @@ void handleHtml() {
     server.on("/config-mqtt.html", []() {
         server.send_P(200, "text/html", CONFIG_MQTT_HTML);
     });
+    server.on("/config-thermostat.html", []() {
+        server.send_P(200, "text/html", CONFIG_THERMOSTAT_HTML);
+    });
     server.on("/reboot.html", []() {
         server.send_P(200, "text/html", REBOOT_HTML);
     });

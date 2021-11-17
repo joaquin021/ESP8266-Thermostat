@@ -15,10 +15,8 @@ class ThermostatData {
     char mode[5] = "off";
     bool connectivityActive = true;
     bool existThermostatConfig();
-    void loadThermostatConfig();
 
    public:
-    ThermostatData();
     float getTemperature();
     void setTemperature(float newTemperature);
     float getHumidity();
@@ -39,6 +37,7 @@ class ThermostatData {
     void changeMode(uint8_t *newMode, unsigned int length);
     bool isConnectivityActive();
     bool toggleConnectivity();
+    void loadThermostatConfig();
     void writeThermostatConfig();
     void deleteThermostatConfig();
     String toJson();

@@ -242,7 +242,7 @@ const char CONFIG_THERMOSTAT_HTML[] PROGMEM = R"=====(
                     <div class="mdl-grid">
                         <div class="mdl-cell mdl-cell--12-col-desktop mdl-cell--8-col-tablet mdl-cell--4-col-phone">
                             <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                <input class="mdl-textfield__input" type="number" id="hotTolerance" name="hotTolerance">
+                                <input class="mdl-textfield__input" type="number" id="hotTolerance" name="hotTolerance" step=".1" min="0.1" max="5">
                                 <label class="mdl-textfield__label" for="hotTolerance">Hot tolerance</label>
                             </div>
                         </div>
@@ -250,7 +250,7 @@ const char CONFIG_THERMOSTAT_HTML[] PROGMEM = R"=====(
                     <div class="mdl-grid">
                         <div class="mdl-cell mdl-cell--12-col-desktop mdl-cell--8-col-tablet mdl-cell--4-col-phone">
                             <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                <input class="mdl-textfield__input" type="number" id="coldTolerance" name="coldTolerance">
+                                <input class="mdl-textfield__input" type="number" id="coldTolerance" name="coldTolerance" step=".1" min="0.1" max="5">
                                 <label class="mdl-textfield__label" for="coldTolerance">Cold Tolerance</label>
                             </div>
                         </div>
@@ -258,7 +258,7 @@ const char CONFIG_THERMOSTAT_HTML[] PROGMEM = R"=====(
                     <div class="mdl-grid">
                         <div class="mdl-cell mdl-cell--12-col-desktop mdl-cell--8-col-tablet mdl-cell--4-col-phone">
                             <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                <input class="mdl-textfield__input" type="number" id="temperatureStep" name="temperatureStep">
+                                <input class="mdl-textfield__input" type="number" id="temperatureStep" name="temperatureStep" step=".1" min="0.1" max="5">
                                 <label class="mdl-textfield__label" for="temperatureStep">Temperature step</label>
                             </div>
                         </div>

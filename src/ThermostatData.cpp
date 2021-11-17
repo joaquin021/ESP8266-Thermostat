@@ -106,10 +106,6 @@ void ThermostatData::deleteThermostatConfig() {
     LittleFS.remove("/config/thermostat");
 }
 
-ThermostatData::ThermostatData() {
-    loadThermostatConfig();
-}
-
 String ThermostatData::toJson() {
     return String("{\"temperature\": \"") + temperature +
            "\", \"humidity\": \"" + humidity +

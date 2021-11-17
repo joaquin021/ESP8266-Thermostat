@@ -16,6 +16,7 @@ void setup() {
     Serial.begin(921600);
     Serial.println();
     LittleFS.begin();
+    thermostatData.loadThermostatConfig();
     pinMode(RELAY_PIN, OUTPUT);
     thermostatOff();
     refreshShtMeasures(true);
