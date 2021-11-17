@@ -1,6 +1,8 @@
 #ifndef __EVENTS_DISPATCHER_H
 #define __EVENTS_DISPATCHER_H
 
+#include <ESP8266mDNS.h>
+
 #include <queue>
 
 #include "EventUtils.hpp"
@@ -8,8 +10,6 @@
 #include "TftUtils.hpp"
 #include "ThermostatManager.hpp"
 #include "WiFiUtils.hpp"
-
-boolean lastConnectivityActive = thermostatData.isConectivityActive();
 
 void manageRoomMeasuresEvent() {
     updateRoomTemp();
@@ -28,7 +28,7 @@ void manageModeEvent() {
 }
 
 void manageActionEvent() {
-    if (thermostatData.getAction().compare("heating") == 0) {
+    if (thermostatData.getAction().equals("heating")) {
         thermostatHeating();
     } else {
         thermostatOff();
@@ -38,18 +38,44 @@ void manageActionEvent() {
 }
 
 void manageConnectivityEvent() {
-    if (lastConnectivityActive != thermostatData.isConectivityActive()) {
-        if (thermostatData.isConectivityActive()) {
-            connectWiFi();
-            checkAndconnectToMqttServer();
-            refreshMqttData(true);
-        } else {
-            disconnectMqtt();
-            disconnectWiFi();
-        }
-        lastConnectivityActive = thermostatData.isConectivityActive();
+    drawWiFiButton(WIFI_WORKING_COLOR);
+    if (thermostatData.isConnectivityActive()) {
+        connectWiFi();
+    } else {
+        disconnectMqtt();
+        disconnectWiFi();
     }
-    drawWiFiButton();
+}
+
+void manageWiFiChangeStatusEvent() {
+    drawWiFiButton(getWiFiStatusColor());
+    refreshMqttData(true);
+}
+
+void manageWiFiConfigEvent() {
+    drawWiFiButton(WIFI_WORKING_COLOR);
+    addWiFiConfigAndConnect();
+}
+
+void manageConfigMqttEvent() {
+    disconnectMqtt();
+    writeMqttConfig();
+    refreshMqttData(true);
+}
+
+void manageConfigThermostatEvent() {
+    thermostatData.writeThermostatConfig();
+}
+
+void manageRebootEvent() {
+    ESP.restart();
+}
+
+void manageResetEvent() {
+    deleteMqttConfig();
+    deleteWiFiConfig();
+    thermostatData.deleteThermostatConfig();
+    addEvent(EVENT_TYPES::REBOOT);
 }
 
 void dispatchEvent() {
@@ -74,6 +100,25 @@ void dispatchEvent() {
                     break;
                 case EVENT_TYPES::CONNECTIVITY:
                     manageConnectivityEvent();
+                    break;
+                case EVENT_TYPES::WIFI_CHANGE_STATUS:
+                    manageWiFiChangeStatusEvent();
+                    break;
+                case EVENT_TYPES::CONFIG_WIFI:
+                    manageWiFiConfigEvent();
+                    break;
+                case EVENT_TYPES::CONFIG_MQTT:
+                    manageConfigMqttEvent();
+                    break;
+                case EVENT_TYPES::CONFIG_THERMOSTAT:
+                    manageConfigThermostatEvent();
+                    break;
+                case EVENT_TYPES::REBOOT:
+                    manageRebootEvent();
+                    break;
+                case EVENT_TYPES::RESET:
+                    manageResetEvent();
+                    break;
                 default:
                     break;
             }

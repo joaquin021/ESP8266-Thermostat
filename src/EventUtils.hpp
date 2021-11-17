@@ -7,9 +7,15 @@ enum EVENT_TYPES { ROOM_MEASURES,
                    TARGET_TEMPERATURE,
                    MODE,
                    ACTION,
-                   CONNECTIVITY };
+                   CONNECTIVITY,
+                   WIFI_CHANGE_STATUS,
+                   CONFIG_WIFI,
+                   CONFIG_MQTT,
+                   CONFIG_THERMOSTAT,
+                   REBOOT,
+                   RESET };
 
-String EVENT_TYPES_DESCRIPTION[] = {"ROOM_MEASURES", "TARGET_TEMPERATURE", "MODE", "ACTION", "CONECTIVITY"};
+String EVENT_TYPES_DESCRIPTION[] = {"ROOM_MEASURES", "TARGET_TEMPERATURE", "MODE", "ACTION", "CONECTIVITY", "CONFIG_WIFI"};
 
 std::queue<EVENT_TYPES> EVENTS;
 
