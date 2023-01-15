@@ -75,9 +75,6 @@ void connectWiFi_STA_fromConfig() {
         Serial.println("WiFiUtils.hpp\t\t\tConnecting from config to " + ssid);
         WiFi.begin(ssid, password);
         checkConnectionWiFi_STA();
-        if (WiFi.status() != WL_CONNECTED) {
-            deleteWiFiConfig();
-        }
     } else {
         Serial.println("WiFiUtils.hpp\t\t\tNo configuration found for WiFi connection");
     }
